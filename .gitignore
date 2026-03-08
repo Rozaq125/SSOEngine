@@ -1,0 +1,36 @@
+# Build directories
+build/
+cmake-build-*/
+*.o
+*.obj
+*.exe
+
+# IDE files
+.idea/
+.vscode/
+
+# CMake
+CMakeCache.txt
+CMakeFiles/
+
+# Python
+__pycache__/
+*.pyc
+
+# Generated files
+include/assets_data.h
+
+# OS files
+.DS_Store
+Thumbs.db
+build/  bin/  lib/  include/  *.exe  *.o 
+build/ 
+bin/ 
+bin/ 
+include/ 
+*.exe 
+*.o 
+lib/ 
+include/ 
+bin/ 
+*.exe 

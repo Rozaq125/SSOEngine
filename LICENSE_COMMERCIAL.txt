@@ -1,0 +1,32 @@
+========================================
+       SSOEngine DONATION LICENSE
+        SSOGames Studio (c) 2026
+========================================
+
+SSOEngine is a free, open-source-ish game engine for creators. 
+If you find this engine useful, please consider supporting the 
+development through:
+
+DONATION LINK: https://saweria.co/omedonation
+
+1. PERMITTED USES:
+   - You are FREE to create and distribute commercial or personal games.
+   - You are FREE to modify the engine source code for your project.
+   - You can sell any games you make with SSOEngine without paying royalties.
+
+2. RESTRICTIONS:
+   - You MAY NOT resell the SSOEngine source code as a standalone product.
+   - You MAY NOT claim SSOEngine as your own creation.
+   - Please keep the "Powered by SSOGames" or copyright notices intact.
+
+3. SUPPORT:
+   - Development is community-driven and supported by your donations.
+   - For feedback or collaboration, contact: omedonation@gmail.com (or your studio email)
+
+4. WARRANTY:
+   - Provided "AS IS", without warranty of any kind. Use at your own risk.
+
+----------------------------------------
+SUPPORT INDIE DEV: https://saweria.co/omedonation
+SSOGames Studio - All Rights Reserved
+----------------------------------------
