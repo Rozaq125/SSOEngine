@@ -1,0 +1,72 @@
+===============================================================================
+                       SSOENGINE - END USER LICENSE AGREEMENT
+                                   Version 1.0
+                          (C) 2026 SSOGAMES STUDIO
+===============================================================================
+
+PLEASE READ THIS AGREEMENT CAREFULLY BEFORE USING SSOENGINE. BY DOWNLOADING, 
+INSTALLING, OR USING THE SOFTWARE, YOU ARE AGREEING TO BE BOUND BY THE TERMS 
+OF THIS LICENSE.
+
+1. DEFINITIONS
+--------------
+"Software" refers to SSOEngine, including but not limited to source code (.h, 
+.cpp), build scripts (.bat), asset packing tools, and documentation.
+"Licensor" refers to SSOGames Studio and its lead developer, Zak Gantenk.
+"User" refers to any individual or entity utilizing the Software.
+
+2. GRANT OF LICENSE
+-------------------
+Licensor hereby grants User a worldwide, non-exclusive, no-charge, royalty-free, 
+irrevocable license to:
+- Use the Software for personal, educational, or commercial purposes.
+- Modify the source code to fit specific project needs.
+- Distribute compiled binaries (.exe) created using the Software without 
+  paying royalties.
+
+3. DONATIONWARE MODEL
+---------------------
+The Software is provided for free. However, users are encouraged to support 
+continued development through voluntary donations via the official channels:
+(https://saweria.co/omedonation). 
+Donations are non-refundable and do not alter the terms of this license.
+
+4. INTELLECTUAL PROPERTY & ATTRIBUTION
+--------------------------------------
+- Ownership: All title and copyrights in and to the Software are owned by 
+  SSOGames Studio.
+- Attribution: You must retain all original copyright notices in the source 
+  code headers. 
+- Branding: You may not use the "SSOEngine" or "SSOGames Studio" name or logos 
+  to endorse your product without prior written permission.
+
+5. RESTRICTIONS
+---------------
+- You may NOT sell, rent, or lease the SSOEngine source code as a standalone 
+  product or as part of a "Starter Kit" or "Engine Asset" on any marketplace.
+- You may NOT use the Software to develop malicious software (Malware, 
+  Spyware, etc.).
+
+6. NO WARRANTY (AS-IS)
+----------------------
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
+
+7. LIMITATION OF LIABILITY
+--------------------------
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, 
+DAMAGES, OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR 
+OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE 
+USE OR OTHER DEALINGS IN THE SOFTWARE. YOU USE THIS ENGINE AT YOUR OWN RISK.
+
+8. TERMINATION
+--------------
+This license is effective until terminated. Your rights under this license 
+will terminate automatically without notice from the Licensor if you fail to 
+comply with any term(s) of this license.
+
+===============================================================================
+                        THANK YOU FOR CHOOSING SSOENGINE
+                          Build Great Games, Rozak
+===============================================================================

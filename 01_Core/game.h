@@ -2,69 +2,129 @@
 #define GAME_H
 
 #include "raylib.h"
-#include "tools/sso_math.h"
+#include "scripts/player.h"
+#include "scripts/enemy.h"
+#include "tools/sso_timer.h"
+#include "tools/sso_camera.h"
 
-// Changed 'floor' to 'ground' to avoid conflict with math.h floor() function
-Rectangle player = { 0, 0, 50, 50 };
-Rectangle ground = { 0, 650, 1280, 70 }; 
-Rectangle wall = { 600, 500, 200, 40 };  
+// --- Global World Geometry ---
+// Extreme width to allow long-distance exploration with the camera tool
+inline Rectangle ground = { -5000, 650, 10000, 70 }; 
+inline Rectangle wall   = { 700, 500, 300, 50 };
 
-float velocityY = 0.0f;
-const float gravity = 1500.0f; 
-const float jumpForce = -700.0f; 
-bool isGrounded = false;
-Color playerColor = BLUE;
+// --- Engine Core Systems ---
+SSO::Timer countdownTimer;
+SSO::Camera mainCam({ 640.0f, 360.0f }, 1280, 720);
+inline bool gameFinished = false;
+inline bool playerWon    = false;
 
-void Start() {
-    player.x = 100.0f;
-    player.y = 100.0f;
+/**
+ * @brief Global Startup sequence.
+ * Configures the environment and the game state.
+ */
+inline void Start() {
+    InitPlayer();
+    InitEnemy();
+
+    // Mission: Survive for 30 seconds
+    countdownTimer.Reset();
+    countdownTimer.SetValue(30.0f);
+    countdownTimer.Start();
+    
+    gameFinished = false;
+    playerWon = false;
 }
 
-void Update(float dt) {
-    float speed = 400.0f;
-    Vector2 oldPos = { player.x, player.y };
+/**
+ * @brief Main Logic Loop.
+ * Handles Physics, AI Behavior, and Camera Smoothing.
+ */
+inline void Update(float dt) {
+    if (!gameFinished) {
+        // 1. Process Object Updates
+        UpdatePlayer(dt, ground, wall);
+        UpdateEnemy(dt, ground, wall);
+        
+        // 2. Process Timer Logic
+        countdownTimer.UpdateCountdown(dt);
 
-    if (IsKeyDown(KEY_D)) player.x += speed * dt;
-    if (IsKeyDown(KEY_A)) player.x -= speed * dt;
+        // 3. Process Camera Tracking
+        // Tracking the center point of the player's rectangle
+        Vector2 playerCenter = { 
+            playerRec.x + playerRec.width / 2.0f, 
+            playerRec.y + playerRec.height / 2.0f 
+        };
+        mainCam.Follow(playerCenter, dt);
 
-    velocityY += gravity * dt;
-    player.y += velocityY * dt;
-
-    isGrounded = false; 
-    
-    // Check collision with ground (Fixed name)
-    if (CheckCollision(player, ground)) {
-        player.y = ground.y - player.height;
-        velocityY = 0;
-        isGrounded = true;
-    }
-    
-    if (CheckCollision(player, wall)) {
-        if (velocityY > 0 && oldPos.y + player.height <= wall.y) {
-            player.y = wall.y - player.height;
-            velocityY = 0;
-            isGrounded = true;
-            playerColor = RED;
+        // 4. Combat & Collision Logic
+        if (CheckCollisionRecs(playerRec, enemyRec)) {
+            // Impact! Shake the camera and trigger game over
+            mainCam.Shake(15.0f, 0.3f);
+            gameFinished = true;
+            playerWon = false;
         }
-    } else {
-        playerColor = BLUE;
-    }
 
-    if (IsKeyPressed(KEY_SPACE) && isGrounded) {
-        velocityY = jumpForce;
-        isGrounded = false;
+        // 5. Objective Check
+        if (countdownTimer.IsFinished()) {
+            gameFinished = true;
+            playerWon = true;
+        }
     }
-    
-    Vector2 clampedPos = ClampVector2((Vector2){player.x, player.y}, 0, 0, 1280 - player.width, 720);
-    player.x = clampedPos.x;
 }
 
-void Render() {
-    DrawText("SSOEngine Platformer: A/D to Move, SPACE to Jump", 10, 10, 20, RAYWHITE);
+/**
+ * @brief Main Render Loop.
+ * Renders World Space objects (Camera-aware) and Screen Space (UI).
+ */
+inline void Render() {
+    // --- Phase 1: World Space (Rendering objects affected by the Camera) ---
+    mainCam.Begin();
+        // Environment
+        DrawRectangleRec(ground, DARKGREEN);
+        DrawRectangleRec(wall, DARKGRAY);
+        DrawRectangleLinesEx(wall, 2, LIGHTGRAY); // Visual detail
+        
+        // Entities
+        RenderEnemy();
+        RenderPlayer();
+    mainCam.End();
+
+    // --- Phase 2: Screen Space (Fixed HUD Elements) ---
+    // Top Bar HUD
+    DrawRectangle(0, 0, 1280, 55, Fade(BLACK, 0.6f)); 
+    DrawRectangleLinesEx({0, 0, 1280, 55}, 1, Fade(RAYWHITE, 0.2f));
+
+    // Live Timer Display
+    float timeVal = countdownTimer.GetValue();
+    Color timerColor = (timeVal < 10.0f) ? RED : YELLOW;
+    DrawText(TextFormat("SURVIVAL CLOCK: %.1f s", timeVal), 520, 15, 25, timerColor);
     
-    DrawRectangleRec(ground, DARKGREEN); // Fixed name
-    DrawRectangleRec(wall, GRAY);
-    DrawRectangleRec(player, playerColor);
+    // Engine Brand / Info
+    DrawText("SSOEngine Platformer: [A/D] Walk | [SPACE] Jump", 25, 18, 18, RAYWHITE);
+
+    // --- Phase 3: Post-Game Overlays ---
+    if (gameFinished) {
+        // Darken the background for the menu
+        DrawRectangle(0, 0, 1280, 720, Fade(BLACK, 0.85f));
+        
+        if (playerWon) {
+            DrawText("MISSION: SUCCESS", 400, 300, 50, GREEN);
+            DrawText("Target successfully survived the encounter.", 420, 370, 20, LIGHTGRAY);
+        } else {
+            DrawText("MISSION: TERMINATED", 380, 300, 50, RED);
+            DrawText("Elimination confirmed by Stalker AI.", 460, 370, 20, LIGHTGRAY);
+        }
+        
+        DrawText("Press [ESC] to Quit Engine", 520, 480, 20, GRAY);
+    }
+}
+
+/**
+ * @brief Resource Disposal.
+ */
+inline void Shutdown() {
+    UnloadPlayer();
+    UnloadEnemy();
 }
 
 #endif

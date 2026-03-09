@@ -1,32 +1,44 @@
 #include "raylib.h"
 #include "game.h"
 
+/**
+ * SSOEngine v1.0 - Main Entry Point
+ * Designed for High-Performance 2D Game Development
+ */
 int main(void) {
-    // Initial Window Configuration
-    InitWindow(1280, 720, "SSOEngine v1.0");
+    // 1. Initial Engine Configuration
+    const int screenWidth = 1280;
+    const int screenHeight = 720;
+    
+    InitWindow(screenWidth, screenHeight, "SSOEngine v1.0 - Professional Build");
     SetTargetFPS(60);
 
-    // Execute user's startup logic
+    // 2. Initialize Game Logic & Assets
     Start(); 
 
+    // 3. Main Engine Loop
     while (!WindowShouldClose()) {
+        // Calculate Frame Time (Delta Time)
         float deltaTime = GetFrameTime();
 
-        // 1. Process Game Logic
+        // --- UPDATE PHASE ---
         Update(deltaTime); 
 
-        // 2. Render Graphics
+        // --- RENDER PHASE ---
         BeginDrawing();
-            ClearBackground(BLACK);
+            ClearBackground(SKYBLUE); // Default sky color
             
-            // Execute user's render logic
+            // Render all objects from game.h
             Render(); 
             
-            // Engine Watermark
-            DrawText("Powered by SSOEngine", 1100, 700, 10, GRAY);
+            // Permanent Engine Watermark
+            DrawText("Powered by SSOEngine", 1100, 700, 10, DARKGRAY);
         EndDrawing();
     }
 
+    // 4. Memory Cleanup
+    Shutdown(); 
     CloseWindow();
+    
     return 0;
 }
