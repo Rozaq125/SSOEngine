@@ -23,56 +23,99 @@ namespace SSO {
             long long offset;
         };
 
-        // Memuat Texture langsung dari file .sso tanpa ekstrak ke folder
-        inline Texture2D LoadTextureFromBundle(const std::string& bundlePath, const std::string& targetFile) {
+        /**
+         * Core Function: Extracts raw binary data from the .sso bundle.
+         * Returns a pointer to the data allocated in memory. 
+         * User is responsible for freeing the memory if not handled by Raylib loaders.
+         */
+        inline unsigned char* LoadRawDataFromBundle(const std::string& bundlePath, const std::string& targetFile, int* dataSize) {
             std::ifstream file(bundlePath, std::ios::binary);
             if (!file) {
-                TraceLog(LOG_ERROR, "SSO_PROVIDER: Could not open bundle %s", bundlePath.c_str());
-                return { 0 };
+                TraceLog(LOG_ERROR, "SSO_PROVIDER: Failed to open bundle at %s", bundlePath.c_str());
+                return nullptr;
             }
 
-            // 1. Read Header
             AssetHeader header;
             file.read(reinterpret_cast<char*>(&header), sizeof(AssetHeader));
 
+            // Validate SSO Signature
             if (std::memcmp(header.signature, "SSO ", 4) != 0) {
-                TraceLog(LOG_ERROR, "SSO_PROVIDER: Invalid .sso signature!");
-                return { 0 };
+                TraceLog(LOG_ERROR, "SSO_PROVIDER: Invalid bundle signature!");
+                file.close();
+                return nullptr;
             }
 
-            // 2. Search Metadata for the target file
-            FileMetadata targetMeta;
-            bool found = false;
             for (int i = 0; i < header.fileCount; ++i) {
                 FileMetadata meta;
                 file.read(reinterpret_cast<char*>(&meta), sizeof(FileMetadata));
+                
                 if (targetFile == meta.fileName) {
-                    targetMeta = meta;
-                    found = true;
-                    break;
+                    unsigned char* buffer = (unsigned char*)RL_MALLOC(meta.fileSize);
+                    file.seekg(meta.offset);
+                    file.read(reinterpret_cast<char*>(buffer), meta.fileSize);
+                    file.close();
+                    
+                    *dataSize = (int)meta.fileSize;
+                    TraceLog(LOG_INFO, "SSO_PROVIDER: Found and extracted %s (%d bytes)", targetFile.c_str(), *dataSize);
+                    return buffer;
                 }
             }
 
-            if (!found) {
-                TraceLog(LOG_ERROR, "SSO_PROVIDER: File %s not found in bundle!", targetFile.c_str());
-                return { 0 };
-            }
-
-            // 3. Read Binary Data from Offset
-            std::vector<unsigned char> buffer(targetMeta.fileSize);
-            file.seekg(targetMeta.offset);
-            file.read(reinterpret_cast<char*>(buffer.data()), targetMeta.fileSize);
+            TraceLog(LOG_WARNING, "SSO_PROVIDER: File '%s' not found in bundle", targetFile.c_str());
             file.close();
+            return nullptr;
+        }
 
-            // 4. Convert Binary to Raylib Texture
-            // Get file extension for Raylib loader
-            std::string ext = targetFile.substr(targetFile.find_last_of("."));
-            Image img = LoadImageFromMemory(ext.c_str(), buffer.data(), (int)targetMeta.fileSize);
+        // --- Resource Specific Loaders ---
+
+        // Load 2D Textures (.png, .jpg, .tga)
+        inline Texture2D LoadTextureFromBundle(const std::string& bPath, const std::string& fName) {
+            int size = 0;
+            unsigned char* data = LoadRawDataFromBundle(bPath, fName, &size);
+            if (!data) return { 0 };
+
+            Image img = LoadImageFromMemory(GetFileExtension(fName.c_str()), data, size);
             Texture2D tex = LoadTextureFromImage(img);
-            UnloadImage(img); // Clean up CPU memory
-
-            TraceLog(LOG_INFO, "SSO_PROVIDER: Successfully loaded %s from bundle", targetFile.c_str());
+            UnloadImage(img);
+            RL_FREE(data); 
             return tex;
+        }
+
+        // Load Custom Fonts (.ttf, .otf)
+        inline Font LoadFontFromBundle(const std::string& bPath, const std::string& fName, int fontSize) {
+            int size = 0;
+            unsigned char* data = LoadRawDataFromBundle(bPath, fName, &size);
+            if (!data) return GetFontDefault();
+
+            Font font = LoadFontFromMemory(GetFileExtension(fName.c_str()), data, size, fontSize, NULL, 0);
+            RL_FREE(data);
+            return font;
+        }
+
+        // Load Audio Waves for Sound Effects (.wav, .ogg)
+        inline Wave LoadWaveFromBundle(const std::string& bPath, const std::string& fName) {
+            int size = 0;
+            unsigned char* data = LoadRawDataFromBundle(bPath, fName, &size);
+            if (!data) return { 0 };
+
+            Wave wave = LoadWaveFromMemory(GetFileExtension(fName.c_str()), data, size);
+            RL_FREE(data);
+            return wave;
+        }
+
+        // Load Music Streams (.mp3, .ogg)
+        // NOTE: Memory must remain allocated for the duration of the stream.
+        inline Music LoadMusicFromBundle(const std::string& bPath, const std::string& fName) {
+            int size = 0;
+            unsigned char* data = LoadRawDataFromBundle(bPath, fName, &size);
+            if (!data) return { 0 };
+
+            return LoadMusicStreamFromMemory(GetFileExtension(fName.c_str()), data, size);
+        }
+
+        // Load Raw Video Buffer (.mp4, .mkv)
+        inline unsigned char* LoadVideoDataFromBundle(const std::string& bPath, const std::string& fName, int* size) {
+            return LoadRawDataFromBundle(bPath, fName, size);
         }
     }
 }

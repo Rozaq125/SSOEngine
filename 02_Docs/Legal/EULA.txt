@@ -12,7 +12,7 @@ OF THIS LICENSE.
 --------------
 "Software" refers to SSOEngine, including but not limited to source code (.h, 
 .cpp), build scripts (.bat), asset packing tools, and documentation.
-"Licensor" refers to SSOGames Studio and its lead developer, Zak Gantenk.
+"Licensor" refers to SSOGames Studio.
 "User" refers to any individual or entity utilizing the Software.
 
 2. GRANT OF LICENSE
@@ -23,12 +23,14 @@ irrevocable license to:
 - Modify the source code to fit specific project needs.
 - Distribute compiled binaries (.exe) created using the Software without 
   paying royalties.
+- Create derivative works based on the Software.
 
 3. DONATIONWARE MODEL
 ---------------------
 The Software is provided for free. However, users are encouraged to support 
 continued development through voluntary donations via the official channels:
-(https://saweria.co/omedonation). 
+- Saweria: https://saweria.co/omedonation
+- GitHub: https://github.com/Rozaq125/SSOEngine
 Donations are non-refundable and do not alter the terms of this license.
 
 4. INTELLECTUAL PROPERTY & ATTRIBUTION

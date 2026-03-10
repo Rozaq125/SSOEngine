@@ -17,6 +17,61 @@ CMakeFiles/
 __pycache__/
 *.pyc
 
+# SSOEngine Safety - High Risk Files (GitHub Suspension Prevention)
+# Binary analysis and reverse engineering tools
+bfd.h
+libbfd.a
+libopcodes.a
+dis-asm.h
+ctf.h
+ctf-api.h
+libctf.a
+libctf-nobfd.a
+libmangle.h
+libmangle.a
+libsframe.a
+libiberty.a
+libiberty/
+diagnostics.h
+plugin-api.h
+sframe-api.h
+sframe.h
+ansidecl.h
+gnumake.h
+symcat.h
+
+# Debugging tools
+gdb/
+bfd-plugins/
+gcc/
+
+# Asset packer executable (built on-demand)
+00_BuildTools/sso_packer.exe
+00_BuildTools/*.exe
+
+# Generated files
+assets_data.h
+assets.sso
+resource.o
+
+# Risky executables
+*.dll
+*.so
+*.dylib
+
+# Backup folders
+backup_risky/
+
+# Large binary files (over 1MB)
+*.a
+*.lib
+*.so.*
+
+# Security sensitive
+*.pem
+*.key
+*.crt
+
 # Generated files
 include/assets_data.h
 

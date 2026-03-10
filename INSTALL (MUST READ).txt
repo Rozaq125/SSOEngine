@@ -1,0 +1,48 @@
+===================================================
+      SSOEngine v1.0 Alpha - INSTALLATION GUIDE
+===================================================
+
+Thank you for downloading SSOEngine!
+This is a lightweight, modular C++ game engine SDK built on Raylib.
+Follow these steps to set up your environment:
+
+1. PREREQUISITES (REQUIRED)
+---------------------------
+You need a C++ compiler to build projects with this engine. 
+The build system is optimized for MinGW-w64 (GCC).
+
+* Install MinGW-w64 (via MSYS2 or standalone).
+* Ensure your compiler's 'bin' folder is added to your Windows "Environment Variables" (PATH).
+* Verify installation: Open CMD and type 'g++ --version'. If it returns a version number, you are good to go.
+
+2. FOLDER STRUCTURE
+---------------------------
+Keep this structure intact to ensure the build system works correctly:
+
+[Root]/
+├── 00_BuildTools/   <-- Asset Packer & Metadata Wizard logic
+├── 01_Core/         <-- MAIN WORKSPACE (Run build scripts here)
+├── include/         <-- Raylib Headers
+└── lib/             <-- Raylib Static Libraries (.a)
+
+3. HOW TO BUILD & RUN
+---------------------------
+No complex IDE setup required. Just use the automated build system:
+
+1. Navigate to the '01_Core' folder.
+2. Run 'build.bat' (Double-click or run via CMD).
+3. The Metadata Wizard will prompt:
+   - "Do you want to edit Game Details?" -> Type 'y' to customize Name, Icon, or Version.
+4. The system will automatically:
+   - Pack files from the 'assets' folder into 'assets.sso'.
+   - Compile resources (Icon & Metadata).
+   - Compile your source code into an .exe located in the '01_Core/build' folder.
+
+4. TROUBLESHOOTING
+---------------------------
+* "'g++' is not recognized": MinGW is not installed or not added to your PATH.
+* "Build Failed": Check your code in 'main.cpp' or ensure the library files in /lib are present.
+
+---
+© 2026 SSOGames Studio | Lead Developer: Rozak
+Support the project: https://saweria.co/omedonation

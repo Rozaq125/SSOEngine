@@ -20,13 +20,12 @@ struct FileMetadata {
 };
 
 int main() {
-    // Paths are now relative to the project structure
-    // We look into 01_Core/assets and output to 01_Core/build
+    // Path tetep sama sesuai struktur industrial lu
     std::string assetFolder = "../01_Core/assets";
     std::string outputFile = "../01_Core/build/assets.sso";
 
     std::cout << "==========================================" << std::endl;
-    std::cout << "   SSOEngine Asset Packer v1.0 (English)  " << std::endl;
+    std::cout << "   SSOEngine Asset Packer v1.1 (Recursive) " << std::endl;
     std::cout << "==========================================" << std::endl;
 
     if (!fs::exists(assetFolder)) {
@@ -35,8 +34,10 @@ int main() {
         return 1;
     }
 
+    // --- FITUR BARU: RECURSIVE SCAN ---
+    // Tetap pake vector files lu, tapi sekarang masuk ke sub-folder
     std::vector<fs::path> files;
-    for (const auto& entry : fs::directory_iterator(assetFolder)) {
+    for (const auto& entry : fs::recursive_directory_iterator(assetFolder)) {
         if (entry.is_regular_file()) {
             files.push_back(entry.path());
         }
@@ -54,16 +55,19 @@ int main() {
     // 1. Write Placeholder Header
     out.write(reinterpret_cast<char*>(&header), sizeof(AssetHeader));
 
-    // 2. Prepare Metadata
+    // 2. Prepare Metadata (LOGIKA OFFSET TETEP SAMA)
     std::vector<FileMetadata> metadataList;
     long long currentOffset = sizeof(AssetHeader) + (sizeof(FileMetadata) * header.fileCount);
 
     for (const auto& filePath : files) {
         FileMetadata meta;
-        std::string name = filePath.filename().string();
+        
+        // --- FITUR BARU: RELATIVE PATH ---
+        // Biar tersimpan "font/vampire.ttf" bukan cuma "vampire.ttf"
+        std::string relativePath = fs::relative(filePath, assetFolder).generic_string();
         
         std::memset(meta.fileName, 0, 64);
-        name.copy(meta.fileName, name.size() > 63 ? 63 : name.size());
+        relativePath.copy(meta.fileName, relativePath.size() > 63 ? 63 : relativePath.size());
 
         meta.fileSize = fs::file_size(filePath);
         meta.offset = currentOffset;
@@ -77,13 +81,15 @@ int main() {
         out.write(reinterpret_cast<const char*>(&meta), sizeof(FileMetadata));
     }
 
-    // 4. Write Binary Data
+    // 4. Write Binary Data (LOGIKA BUFFER TETEP SAMA)
     for (size_t i = 0; i < files.size(); ++i) {
         std::ifstream in(files[i], std::ios::binary);
         if (!in) {
             std::cerr << "[ERROR] Could not read file: " << files[i] << std::endl;
             continue;
         }
+        
+        // Tetap pake istreambuf_iterator sesuai code asli lu
         std::vector<char> buffer((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
         
         out.write(buffer.data(), buffer.size());
