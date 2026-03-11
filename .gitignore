@@ -1,5 +1,4 @@
 # Build directories
-build/
 cmake-build-*/
 *.o
 *.obj
@@ -17,8 +16,7 @@ CMakeFiles/
 __pycache__/
 *.pyc
 
-# SSOEngine Safety - High Risk Files (GitHub Suspension Prevention)
-# Binary analysis and reverse engineering tools
+# SSOEngine Safety - High Risk Files
 bfd.h
 libbfd.a
 libopcodes.a
@@ -45,7 +43,7 @@ gdb/
 bfd-plugins/
 gcc/
 
-# Asset packer executable (built on-demand)
+# Asset packer executable
 00_BuildTools/sso_packer.exe
 00_BuildTools/*.exe
 
@@ -63,9 +61,10 @@ resource.o
 backup_risky/
 
 # Large binary files (over 1MB)
+# Note: Kalau file di lib/ atau include/ masih ilang, 
+# hapus dua baris di bawah ini:
 *.a
 *.lib
-*.so.*
 
 # Security sensitive
 *.pem
@@ -78,14 +77,13 @@ include/assets_data.h
 # OS files
 .DS_Store
 Thumbs.db
-build/  bin/  lib/  include/  *.exe  *.o 
-build/ 
-bin/ 
-bin/ 
-include/ 
-*.exe 
-*.o 
-lib/ 
-include/ 
-bin/ 
-*.exe 
+
+# Pengecualian folder lib
+!lib/
+!lib/*.a
+!lib/*.lib
+!lib/*.dll
+
+# TETEP IGNORE folder compiler kalau masih ada
+lib/gcc/
+lib/bfd-plugins/
