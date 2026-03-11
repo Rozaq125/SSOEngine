@@ -200,7 +200,7 @@ MIT License - Free to use, modify, and distribute.
 
 ### Author
 - **Rozak** - Lead Developer
-  - GitHub: [@Rozaq125](https://github.com/Rozak125)
+  - GitHub: [@Rozaq125](https://github.com/Rozaq125)
   - Email: spctacularstudio@gmail.com
 
 ### Special Thanks
