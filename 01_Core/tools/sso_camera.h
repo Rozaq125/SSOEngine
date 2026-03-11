@@ -1,8 +1,8 @@
 #ifndef SSO_CAMERA_H
 #define SSO_CAMERA_H
 
-#include "raylib.h"
-#include "raymath.h"
+#include "../include/raylib.h"
+#include "../include/raymath.h"
 
 namespace SSO {
     /**

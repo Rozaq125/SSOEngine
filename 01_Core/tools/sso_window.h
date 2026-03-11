@@ -1,7 +1,7 @@
 #ifndef SSO_WINDOW_H
 #define SSO_WINDOW_H
 
-#include "raylib.h"
+#include "../include/raylib.h"
 #include <math.h>
 
 namespace SSO {

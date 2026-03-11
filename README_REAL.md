@@ -55,7 +55,7 @@ SSOEngine is a **simplified C++ game development framework** that:
 ### Installation
 ```bash
 # Clone and build
-git clone https://github.com/Rozaq125/SSOEngine
+git clone https://github.com/Rozak125/SSOEngine
 cd SSOEngine/01_Core
 build.bat
 
@@ -169,85 +169,87 @@ build.bat
 3. Test thoroughly
 4. Submit a pull request
 
-### Coding Standards
-- Use C++17 features
-- Follow existing code style
-- Add comments for complex logic
-- Include examples for new features
+## ⚠️ Limitations & Reality Check
 
-### Bug Reports
-- Use GitHub Issues
-- Provide detailed steps
-- Include error messages
-- Attach screenshots if applicable
+### This is NOT:
+- ❌ Unity/Unreal competitor
+- ❌ Commercial-grade engine
+- ❌ No-code game maker
+- ❌ Cross-platform solution
+- ❌ Visual development tool
 
----
+### This IS:
+- ✅ Learning project
+- ✅ Raylib wrapper
+- ✅ Small game framework
+- ✅ Educational tool
+- ✅ Simple game starter
 
-## 📄 License & Support
+## 🐛 Known Issues
 
-### License
-SSOEngine is **Donationware** - Free for personal & commercial use!
+- **Windows only** - No cross-platform support yet
+- **Basic documentation** - Still being improved
+- **Limited examples** - Need more sample games
+- **No debugger** - Use external debugging tools
 
-### 🎁 Support the Project
-💝 **Donate on Saweria:** [https://saweria.co/omedonation](https://saweria.co/omedonation)
+## 📄 License
 
-Your support helps us:
-- ✅ Maintain and improve the engine
-- ✅ Add new features and tools
-- ✅ Provide better documentation
-- ✅ Create more examples and tutorials
+MIT License - Free to use, modify, and distribute.
 
-### Community
-- **GitHub**: [Rozaq125/SSOEngine](https://github.com/Rozak125/SSOEngine)
-- **Website**: [SSOEngine Webs](https://ssoengine.pages.dev)
+## 👥 Credits
 
----
+### Author
+- **Rozak** - Lead Developer
+  - GitHub: [@Rozaq125](https://github.com/Rozak125)
+  - Email: spctacularstudio@gmail.com
 
-## 🏆 Showcase
+### Special Thanks
+- **Raylib Team** - For the amazing graphics library
+- **MinGW-w64 Project** - For the compiler tools
+- **Game Dev Community** - For feedback and support
 
-### Games Made with SSOEngine
-*Have you made a game with SSOEngine? Let us know and we'll feature it here!*
-
-### Features in Development
-- 🎵 Audio system improvements
-- 🌐 Networking support
-- 🎨 Particle system
-- 📱 Mobile export options
-- 🎮 Input system enhancements
-
----
-
-## 📞 Contact
-
-### Lead Developer
-**Rozak** - Game Engine Architect
-- GitHub: [@Rozaq125](https://github.com/Rozaq125)
-- Email: spctacularstudio@gmail.com
-
+### Development Tools Used
+- **Raylib** - Graphics and input
+- **MinGW-w64** - C++ compilation
+- **Batch Scripting** - Build automation
+- **AI Assistance** - Documentation help
 
 ---
 
-## 📚 Additional Resources
+## 🎯 Real Use Cases
 
-### Learning Resources
-- [Raylib Documentation](https://www.raylib.com/)
-- [C++ Game Development Tutorials](https://github.com/topics/cpp-game-dev)
-- [Game Programming Patterns](https://gameprogrammingpatterns.com/)
+### ✅ Good For:
+- **Learning game development**
+- **Small 2D projects**
+- **Game jam prototypes**
+- **Educational purposes**
+- **Raylib experimentation**
 
-### Tools & Software
-- **IDE**: Visual Studio Code, CLion
-- **Graphics**: Aseprite, Photoshop
-- **Audio**: Audacity, FMOD
-- **Version Control**: Git, GitHub Desktop
+### ❌ Not Good For:
+- **Large commercial games**
+- **Complex 3D projects**
+- **Multiplayer games**
+- **Mobile development**
+- **Beginners without coding experience**
 
 ---
-**THANK YOU FOR:**
-- **NATHAN**
-- **RAYLIB**
-- **C++**
-- **GITHUB**
+
+## 📞 Support
+
+### Get Help
+- **GitHub Issues** - Report bugs and request features
+- **Code Examples** - Check the tools folder
+- **Raylib Docs** - For graphics functions
+- **Community** - Game development forums
+
+### Before Asking for Help:
+1. ✅ Check if MinGW-w64 is installed
+2. ✅ Try the build.bat script
+3. ✅ Read the error messages
+4. ✅ Check your C++ syntax
+
 ---
 
-**© 2026 SSOGames Studio | Lead Developer: Rozak**
+**⚠️ HONEST ASSESSMENT**: SSOEngine is a **basic framework** for learning game development with Raylib. It's **not** a replacement for professional game engines like Unity or Unreal. Use it for **learning, experimentation, and small projects**.
 
-*Built with passion for indie game developers everywhere.*
+**Built with passion for indie game developers who want to learn C++ and Raylib.** 🎮✨

@@ -7,18 +7,40 @@ setlocal enabledelayedexpansion
 :: ===================================================
 
 :: -------------------------------
-:: Configuration
+:: Default Configuration
 :: -------------------------------
-set "PROJECT_NAME=RO-SHADOW"
+set "PROJECT_NAME=Game"
 set "BUILD_DIR=build"
 set "ASSET_SRC=assets"
 set "ICON_RES=resource.rc"
-
 set "RAYLIB_LIB=..\lib\libraylib.a"
+set "BUILD_MODE=Release"
 
 echo ===================================================
 echo        SSOEngine v1.0 - Automated Build System
 echo ===================================================
+
+:: ===================================================
+:: BUILD MODE SELECTION
+:: ===================================================
+echo.
+echo Select Build Mode:
+echo [1] Release (No console window)
+echo [2] Debug (With console window for debugging)
+echo.
+set /p mode_choice="Choose [1/2]: "
+
+if "%mode_choice%"=="2" (
+    set "BUILD_MODE=Debug"
+    :: DEBUG MODE: Console window appears (NO -mwindows flag)
+    set "CONSOLE_FLAG="
+    echo [INFO] Debug Mode: Console enabled
+) else (
+    set "BUILD_MODE=Release"
+    :: RELEASE MODE: No console window
+    set "CONSOLE_FLAG=-mwindows -Wl,--subsystem,windows"
+    echo [INFO] Release Mode: Console disabled
+)
 
 :: ===================================================
 :: RAYLIB CHECK
@@ -179,16 +201,35 @@ windres "%ICON_RES%" -o "%BUILD_DIR%\resource.o"
 :: ===================================================
 
 echo.
-echo [INFO] Compiling game...
+echo [INFO] Compiling game in %BUILD_MODE% mode...
 
-g++ main.cpp "%BUILD_DIR%\resource.o" -o "%OUTPUT_EXE%" ^
--I. ^
--I../include ^
--L../lib ^
--lraylib ^
--lopengl32 ^
--lgdi32 ^
--lwinmm
+if "%BUILD_MODE%"=="Debug" (
+    echo [INFO] Debug build: Console window will appear
+    g++ main.cpp "%BUILD_DIR%\resource.o" -o "%OUTPUT_EXE%" ^
+    -I. ^
+    -I../include ^
+    -L../lib ^
+    -lraylib ^
+    -lopengl32 ^
+    -lgdi32 ^
+    -lwinmm ^
+    -g ^
+    -DDEBUG
+) else (
+    echo [INFO] Release build: No console window
+    g++ main.cpp "%BUILD_DIR%\resource.o" -o "%OUTPUT_EXE%" ^
+    -I. ^
+    -I../include ^
+    -L../lib ^
+    -lraylib ^
+    -lopengl32 ^
+    -lgdi32 ^
+    -lwinmm ^
+    -mwindows ^
+    -Wl,--subsystem,windows ^
+    -O2 ^
+    -DNDEBUG
+)
 
 :: ===================================================
 :: RESULT
@@ -212,8 +253,16 @@ exit /b %errorlevel%
 
 echo.
 echo ===================================================
-echo BUILD SUCCESS
-echo EXE: %OUTPUT_EXE%
+echo BUILD SUCCESSFUL
 echo ===================================================
+echo Mode      : %BUILD_MODE%
+echo EXE       : %OUTPUT_EXE%
+echo ===================================================
+
+if "%BUILD_MODE%"=="Debug" (
+    echo.
+    echo [INFO] Debug mode: Console will appear when you run the .exe
+    echo [INFO] You can see printf/cout output in the console
+)
 
 pause
