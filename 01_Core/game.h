@@ -2,6 +2,7 @@
 #define GAME_H
 
 #include "raylib.h"
+#include "tools/sso_text.h"
 
 inline bool gameActive = true;
 inline float timer = 0.0f;
@@ -48,6 +49,14 @@ inline void Render() {
     DrawText(statusText, screenWidth - 120, 30, 16, statusColor);
     
     DrawText("SSO", screenWidth - 80, screenHeight - 40, 20, (Color){150, 150, 170, 100});
+
+    SSO::Text::DrawGradient("SSO TEXT POWER", 30, 60, 30, VIOLET, BLUE);
+    SSO::Text::DrawCodeBlock("INTERNAL_LOG: ALL_SYSTEMS_GO", 30, 100, 15, GREEN, BLACK);
+    SSO::Text::DrawTypewriter("Loading custom engine protocols...", 30, 130, 15, 20.0f, timer, DARKGRAY);
+    SSO::Text::DrawWrapped("Testing auto-wrap feature: This text will stay within its bounds and not bleed out of the screen, unlike standard DrawText.", 30, 160, 300, 15, GRAY);
+    SSO::Text::DrawOutline("NEW UI LOADED", screenWidth/2 - 100, 100, 30, (Color){50, 50, 70, 255}, WHITE);
+    SSO::Text::DrawCentered("--- EXPERIMENTAL TEXT ENGINE ---", 200, 20, (Color){150, 150, 255, 255});
+    SSO::Text::DrawVertical("VERSION_1", 10, 300, 15, LIGHTGRAY);
 }
 
 inline void Shutdown() {

@@ -1,9 +1,13 @@
 #include "raylib.h"
 #include "tools/sso_window.h"
+#include "tools/sso_splash.h"
+#include "tools/sso_text.h"
 #include "game.h"
 
 int main(void) {
     SSO::Window::Init(1280, 720, "SSOEngine - Game Loaded");
+    
+    SSO::Splash::Show(2.0f);
     
     SSO::Window::DisableResizing();
     

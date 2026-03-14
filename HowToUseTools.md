@@ -23,6 +23,76 @@ All tools are located in: `01_Core/tools/`
 
 ---
 
+## 📜 sso_text.h - Advanced Text System
+
+### What is its function
+If you find it difficult to create text in plain raylib language then use SSOText to make it easier!
+
+### Include
+```cpp
+#include "tools/sso_text.h"
+```
+
+## Available Functions
+
+#### **Font Management**
+```cpp
+void LoadFont(const char* fileName);
+void UnloadFont();
+
+// Example:
+SSO::Text::LoadFont("assets/fonts/myfont.ttf");
+```
+#### **Special Effects**
+```cpp
+// Create typewriter dialogue
+void DrawTypewriter(const char* text, int x, int y, int fontSize, float speed, float time, Color color);
+
+// Create professional gradients
+void DrawGradient(const char* text, int x, int y, int fontSize, Color top, Color bottom);
+
+// Create text with outline
+void DrawOutline(const char* text, int x, int y, int fontSize, Color color, Color outlineColor);
+```
+
+#### **Layout & Utilities**
+```cpp
+// Automatically wrap text within a specific width
+void DrawWrapped(const char* text, int x, int y, int maxWidth, int fontSize, Color color);
+
+// Draw text perfectly centered on screen
+void DrawCentered(const char* text, int y, int fontSize, Color color);
+
+// Create terminal-style code blocks
+void DrawCodeBlock(const char* code, int x, int y, int fontSize, Color textColor, Color bgColor);
+```
+
+### Example Usage
+```cpp
+#include "tools/sso_text.h"
+
+void Render() {
+    SSO::Window::BeginDrawingVirtual();
+    ClearBackground(BLACK);
+
+    // 1. Title with Gradient and Outline
+    SSO::Text::DrawGradient("SSO ENGINE", 50, 50, 60, YELLOW, RED);
+    SSO::Text::DrawOutline("SSO ENGINE", 50, 50, 60, BLANK, WHITE);
+
+    // 2. Automated Dialogue
+    SSO::Text::DrawTypewriter("Mission Log: Connecting to base...", 50, 150, 20, 15.0f, GetTime(), LIME);
+
+    // 3. Smart Wrap for Story/Description
+    SSO::Text::DrawWrapped("This is a long description that will automatically move to the next line once it hits the maximum width limit.", 
+                           50, 200, 400, 20, RAYWHITE);
+
+    // 4. Centered Footer
+    SSO::Text::DrawCentered("PRESS START TO CONTINUE", 600, 25, GRAY);
+
+    SSO::Window::EndDrawingVirtual();
+}
+```
+
 ## 🎥 sso_camera.h - Advanced Camera System
 
 ### What it ACTUALLY Does
