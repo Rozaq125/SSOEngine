@@ -21,6 +21,27 @@ echo        SSOEngine v1.0 - Automated Build System
 echo ===================================================
 
 :: ===================================================
+:: READ EXISTING PROJECT NAME FROM RESOURCE.RC (IF AVAILABLE)
+:: ===================================================
+if exist "%ICON_RES%" (
+    for /f "usebackq tokens=*" %%a in (`findstr "OriginalFilename" "%ICON_RES%"`) do (
+        set "line=%%a"
+        set "line=!line:*OriginalFilename=!"
+        set "line=!line:~1!"
+        set "line=!line:,=!"
+        set "line=!line: =!"
+        set "line=!line:"=!"
+        set "line=!line:;=!"
+        set "PROJECT_NAME=!line:.exe=!"
+    )
+    
+    if "!PROJECT_NAME!"=="" set "PROJECT_NAME=Game"
+    echo [INFO] Loaded project: !PROJECT_NAME!
+) else (
+    echo [INFO] No existing resource.rc found. Using default.
+)
+
+:: ===================================================
 :: BUILD MODE SELECTION
 :: ===================================================
 echo.
@@ -194,6 +215,8 @@ echo [INFO] Compiling resources...
 
 if exist "%ICON_RES%" (
 windres "%ICON_RES%" -o "%BUILD_DIR%\resource.o"
+) else (
+echo [WARNING] No resource.rc found. Skipping resource compilation.
 )
 
 :: ===================================================

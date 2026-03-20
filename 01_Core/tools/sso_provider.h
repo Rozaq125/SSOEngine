@@ -113,6 +113,60 @@ namespace SSO {
             return LoadMusicStreamFromMemory(GetFileExtension(fName.c_str()), data, size);
         }
 
+        // Load 3D Models (.obj, .gltf, .iqm) - NEW 3D SUPPORT
+        inline Model LoadModelFromBundle(const std::string& bPath, const std::string& fName) {
+            int size = 0;
+            unsigned char* data = LoadRawDataFromBundle(bPath, fName, &size);
+            if (!data) return { 0 };
+
+            Model model = LoadModelFromMemory(GetFileExtension(fName.c_str()), data, size);
+            RL_FREE(data);
+            return model;
+        }
+
+        // Load 3D Meshes for custom processing
+        inline Mesh LoadMeshFromBundle(const std::string& bPath, const std::string& fName) {
+            int size = 0;
+            unsigned char* data = LoadRawDataFromBundle(bPath, fName, &size);
+            if (!data) return { 0 };
+
+            Mesh mesh = LoadMeshFromMemory(GetFileExtension(fName.c_str()), data, size);
+            RL_FREE(data);
+            return mesh;
+        }
+
+        // Load 3D Materials
+        inline Material LoadMaterialFromBundle(const std::string& bPath, const std::string& fName) {
+            int size = 0;
+            unsigned char* data = LoadRawDataFromBundle(bPath, fName, &size);
+            if (!data) return LoadMaterialDefault();
+
+            Material mat = LoadMaterialDefault();
+            // Parse custom material file format if needed
+            // For now, return default material
+            
+            RL_FREE(data);
+            return mat;
+        }
+
+        // Load 3D Animations
+        inline ModelAnimation LoadAnimationFromBundle(const std::string& bPath, const std::string& fName, int* animCount) {
+            int size = 0;
+            unsigned char* data = LoadRawDataFromBundle(bPath, fName, &size);
+            if (!data) {
+                *animCount = 0;
+                return { 0 };
+            }
+
+            ModelAnimation* anims = LoadModelAnimationsFromMemory(GetFileExtension(fName.c_str()), data, size, animCount);
+            RL_FREE(data);
+            
+            if (*animCount > 0) {
+                return anims[0]; // Return first animation
+            }
+            return { 0 };
+        }
+
         // Load Raw Video Buffer (.mp4, .mkv)
         inline unsigned char* LoadVideoDataFromBundle(const std::string& bPath, const std::string& fName, int* size) {
             return LoadRawDataFromBundle(bPath, fName, size);

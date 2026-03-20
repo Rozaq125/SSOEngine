@@ -18,7 +18,16 @@ All tools are located in: `01_Core/tools/`
 ├── sso_ui.h         # Advanced UI System with panels & modals
 ├── sso_math.h       # Collision & Math utilities
 ├── sso_logger.h     # Colored Console Logger
-└── sso_utils.h      # (Currently empty)
+├── sso_ext.h        # System Extension & File Operations
+├── sso_file.h       # Windows File Dialogs
+├── sso_physics.h    # Complete 2D Physics Engine
+├── sso_provider.h   # Asset Bundle System
+├── sso_splash.h     # Professional Splash Screen System
+├── sso_3d.h         # High-Level 3D Rendering API
+├── sso_text.h       # Advanced Text Rendering
+├── sso_container.h  # Panel & Widget System (NEW)
+├── sso_utils.h      # (Currently empty)
+└── raygui.h         # Raylib GUI Extension
 ```
 
 ---
@@ -41,7 +50,7 @@ void LoadFont(const char* fileName);
 void UnloadFont();
 
 // Example:
-SSO::Text::LoadFont("assets/fonts/myfont.ttf");
+SSO::Text::LoadFont("assets/font/myfont.ttf");
 ```
 #### **Special Effects**
 ```cpp
@@ -665,7 +674,992 @@ int main() {
 
 ---
 
-## 🛠️ sso_utils.h - Currently Empty
+## � sso_ext.h - System Extension & File Operations
+
+### What it ACTUALLY Does
+Cross-platform system operations including file management, downloads, git operations, and environment variables.
+
+### Include
+```cpp
+#include "tools/sso_ext.h"
+```
+
+### Available Functions
+
+#### **System Commands**
+```cpp
+// Execute system command
+int result = SSO_System("dir");
+
+// Get command output as string
+std::string output = SSO_GetOutput("ls -la");
+```
+
+#### **Tool Detection**
+```cpp
+// Check if tool exists on system
+bool hasGit = SSO_HasTool("git");
+bool hasCurl = SSO_HasTool("curl");
+```
+
+#### **File & Directory Operations**
+```cpp
+// Download file (auto-detects curl/wget/powershell)
+SSO_Download("https://example.com/file.zip", "downloads/file.zip");
+
+// Copy/Move/Remove files and folders
+SSO_Copy("source.txt", "backup.txt");
+SSO_Move("old.txt", "new.txt");
+SSO_Remove("temp_folder");
+
+// Create directories
+SSO_MakeFolder("data/assets/textures");
+```
+
+#### **Git Operations**
+```cpp
+// Execute git commands
+SSO_Git("clone https://github.com/user/repo.git");
+SSO_Git("pull origin main");
+SSO_Git("add .");
+SSO_Git("commit -m 'Update files'");
+```
+
+#### **System Integration**
+```cpp
+// Open files/folders with default application
+SSO_Open("index.html");        // Opens in browser
+SSO_Open("folder");            // Opens file explorer
+
+// Kill processes
+SSO_KillProcess("notepad.exe");
+
+// Environment variables
+std::string path = SSO_GetEnv("PATH");
+SSO_SetEnv("MY_VAR", "value");
+```
+
+#### **File Utilities**
+```cpp
+// Get file size
+long long size = SSO_GetFileSize("large_file.txt");
+
+// Check if file exists (returns -1 if not found)
+if (size > 0) {
+    // File exists and has size
+}
+```
+
+### Example Usage
+```cpp
+#include "tools/sso_ext.h"
+#include "tools/sso_logger.h"
+
+void SetupProject() {
+    // Create project structure
+    SSO_MakeFolder("assets");
+    SSO_MakeFolder("assets/textures");
+    SSO_MakeFolder("assets/sounds");
+    
+    // Download required assets
+    if (SSO_HasTool("curl")) {
+        SSO::Logger::Log(SSO::Logger::Level::INFO, "Downloading assets...");
+        SSO_Download("https://example.com/textures.png", "assets/textures/player.png");
+    }
+    
+    // Initialize git repository
+    if (SSO_HasTool("git")) {
+        SSO_Git("init");
+        SSO_Git("add .");
+        SSO_Git("commit -m 'Initial commit'");
+    }
+    
+    // Open project folder
+    SSO_Open(".");
+}
+```
+
+---
+
+## 📁 sso_file.h - Windows File Dialogs
+
+### What it ACTUALLY Does
+Native Windows file dialogs for opening files, saving files, and browsing folders.
+
+### Include
+```cpp
+#include "tools/sso_file.h"
+```
+
+### Available Functions
+
+#### **Open File Dialog**
+```cpp
+std::string filePath = SSO_OpenFile(
+    "Text Files (*.txt)\0*.txt\0All Files (*.*)\0*.*\0", 
+    "Select a text file"
+);
+
+if (!filePath.empty()) {
+    // User selected a file
+}
+```
+
+#### **Save File Dialog**
+```cpp
+std::string savePath = SSO_SaveFile(
+    "PNG Files (*.png)\0*.png\0JPEG Files (*.jpg)\0*.jpg\0", 
+    "Save screenshot"
+);
+
+if (!savePath.empty()) {
+    // User chose save location
+}
+```
+
+#### **Browse Folder Dialog**
+```cpp
+std::string folderPath = SSO_BrowseFolder("Select project folder");
+
+if (!folderPath.empty()) {
+    // User selected a folder
+}
+```
+
+### Common File Filters
+```cpp
+// Images
+"Image Files\0*.png;*.jpg;*.jpeg;*.bmp\0All Files\0*.*\0"
+
+// Audio
+"Audio Files\0*.wav;*.mp3;*.ogg\0All Files\0*.*\0"
+
+// Documents
+"Documents\0*.txt;*.doc;*.pdf\0All Files\0*.*\0"
+
+// All supported formats
+"Supported Files\0*.png;*.jpg;*.txt;*.json\0All Files\0*.*\0"
+```
+
+### Example Usage
+```cpp
+#include "tools/sso_file.h"
+#include "tools/sso_window.h"
+#include "raylib.h"
+
+void HandleFileOperations() {
+    // Load texture from file dialog
+    if (IsKeyPressed(KEY_L)) {
+        std::string texturePath = SSO_OpenFile(
+            "Image Files\0*.png;*.jpg;*.jpeg\0All Files\0*.*\0",
+            "Load Texture"
+        );
+        
+        if (!texturePath.empty()) {
+            Texture2D tex = LoadTexture(texturePath.c_str());
+            // Use texture...
+        }
+    }
+    
+    // Save screenshot
+    if (IsKeyPressed(KEY_S)) {
+        std::string savePath = SSO_SaveFile(
+            "PNG Files\0*.png\0All Files\0*.*\0",
+            "Save Screenshot"
+        );
+        
+        if (!savePath.empty()) {
+            TakeScreenshot(savePath.c_str());
+        }
+    }
+    
+    // Select project folder
+    if (IsKeyPressed(KEY_O)) {
+        std::string projectFolder = SSO_BrowseFolder("Select Project Folder");
+        if (!projectFolder.empty()) {
+            // Change working directory or load project
+        }
+    }
+}
+```
+
+---
+
+## 🌊 sso_splash.h - Splash Screen System
+
+### What it ACTUALLY Does
+Professional splash screen with fade in/out effects and progress bar for game startup.
+
+### Include
+```cpp
+#include "tools/sso_splash.h"
+```
+
+### Available Functions
+
+#### **Show Splash Screen**
+```cpp
+SSO::Splash::Show(float duration);
+
+// Example:
+SSO::Splash::Show(3.0f); // Show for 3 seconds
+```
+
+### Visual Features
+- **Fade In/Out** - Smooth alpha transitions
+- **Centered Text** - "SSOENGINE" title
+- **Subtitle** - "Lightweight C++ Power"
+- **Progress Bar** - Bottom loading indicator
+- **Early Exit** - Can be closed with window close button
+
+### Example Usage
+```cpp
+#include "tools/sso_splash.h"
+#include "tools/sso_window.h"
+
+int main() {
+    // Show splash screen before window initialization
+    SSO::Splash::Show(2.5f);
+    
+    // Initialize main game window
+    SSO::Window::Init(1280, 720, "My Game");
+    
+    // Game loop...
+    
+    SSO::Window::Close();
+    return 0;
+}
+```
+
+---
+
+## 📦 sso_provider.h - Asset Bundle System
+
+### What it ACTUALLY Does
+Custom asset bundle format (.sso) for packaging game assets into single files with fast loading.
+
+### Include
+```cpp
+#include "tools/sso_provider.h"
+```
+
+### Available Functions
+
+#### **Load Raw Data from Bundle**
+```cpp
+int dataSize;
+unsigned char* data = SSO::Provider::LoadRawDataFromBundle(
+    "assets.sso", 
+    "textures/player.png", 
+    &dataSize
+);
+
+if (data) {
+    // Use data...
+    free(data); // Don't forget to free!
+}
+```
+
+#### **Load Raylib Resources from Bundle**
+```cpp
+// Load texture
+Texture2D texture = SSO::Provider::LoadTextureFromBundle("assets.sso", "player.png");
+
+// Load sound
+Sound sound = SSO::Provider::LoadSoundFromBundle("assets.sso", "jump.wav");
+
+// Load music
+Music music = SSO::Provider::LoadMusicFromBundle("assets.sso", "background.ogg");
+```
+
+#### **Bundle Structure**
+```
+SSO Bundle Format:
+├── Header (SSO + version + file count)
+├── File Metadata Array
+│   ├── filename (64 bytes)
+│   ├── file size (8 bytes)
+│   └── offset (8 bytes)
+└── Raw File Data
+```
+
+### Example Usage
+```cpp
+#include "tools/sso_provider.h"
+#include "tools/sso_window.h"
+
+struct GameAssets {
+    Texture2D playerTexture;
+    Texture2D enemyTexture;
+    Sound jumpSound;
+    Music backgroundMusic;
+};
+
+bool LoadAssets(GameAssets& assets) {
+    // Load all assets from bundle
+    assets.playerTexture = SSO::Provider::LoadTextureFromBundle("game.sso", "player.png");
+    assets.enemyTexture = SSO::Provider::LoadTextureFromBundle("game.sso", "enemy.png");
+    assets.jumpSound = SSO::Provider::LoadSoundFromBundle("game.sso", "jump.wav");
+    assets.backgroundMusic = SSO::Provider::LoadMusicFromBundle("game.sso", "background.ogg");
+    
+    // Check if all loaded successfully
+    return (assets.playerTexture.id > 0 && 
+            assets.enemyTexture.id > 0 && 
+            assets.jumpSound.frameCount > 0);
+}
+```
+
+---
+
+## 🎮 sso_3d.h - High-Level 3D Rendering API
+
+### What it ACTUALLY Does
+High-level 3D rendering system that simplifies Raylib's 3D functions with model loading, basic shapes, collision detection, and camera management. Perfect for 3D prototyping and mixed 2D/3D games.
+
+### Include
+```cpp
+#include "tools/sso_3d.h"
+```
+
+### Available Functions
+
+#### **Model Loading & Management**
+```cpp
+// Load 3D models (supports .obj, .gltf, .iqm)
+Model playerModel = SSO::3D::SSO_LoadModel("assets/player.obj");
+Model terrainModel = SSO::3D::SSO_LoadModel("assets/level.gltf");
+
+// Simple model rendering with automatic scaling
+SSO::3D::SSO_DrawModel(playerModel, {x, y, z}, 1.0f, WHITE);
+
+// Clean up model resources
+SSO::3D::SSO_UnloadModel(playerModel);
+
+// Get model bounding box for collision
+BoundingBox bounds = SSO::3D::SSO_GetModelBoundingBox(playerModel);
+```
+
+#### **3D Camera System**
+```cpp
+// Switch between 2D UI and 3D rendering
+Camera3D camera = { 0 };
+camera.position = { 10.0f, 10.0f, 10.0f };
+camera.target = { 0.0f, 0.0f, 0.0f };
+camera.up = { 0.0f, 1.0f, 0.0f };
+camera.fovy = 45.0f;
+camera.projection = CAMERA_PERSPECTIVE;
+
+// Begin 3D mode
+SSO::3D::SSO_BeginMode3D(camera);
+
+// Your 3D rendering code here
+
+// End 3D mode and return to 2D
+SSO::3D::SSO_EndMode3D();
+```
+
+#### **Basic 3D Shapes**
+```cpp
+// Quick prototyping shapes
+SSO::3D::SSO_DrawCube({x, y, z}, size, BLUE);
+SSO::3D::SSO_DrawSphere({x, y, z}, radius, RED);
+SSO::3D::SSO_DrawCylinder({x, y, z}, radiusTop, radiusBottom, height, 16, GREEN);
+
+// Wireframe versions
+SSO::3D::SSO_DrawCubeWires({x, y, z}, size, WHITE);
+SSO::3D::SSO_DrawSphereWires({x, y, z}, radius, WHITE);
+SSO::3D::SSO_DrawCylinderWires({x, y, z}, radiusTop, radiusBottom, height, 16, WHITE);
+```
+
+#### **Helper Functions**
+```cpp
+// Draw grid for reference
+SSO::3D::SSO_DrawGrid(20, 1.0f);
+
+// Draw 3D gizmo at position
+SSO::3D::SSO_DrawGizmo({0, 0, 0});
+
+// Draw billboard (always faces camera)
+SSO::3D::SSO_DrawBillboard(camera, texture, {x, y, z}, 2.0f, WHITE);
+
+// Draw plane
+SSO::3D::SSO_DrawPlane({0, 0, 0}, {10, 10}, GRAY);
+
+// Draw ray for debugging
+SSO::3D::SSO_DrawRay(startPos, direction, YELLOW);
+```
+
+#### **3D Collision Detection**
+```cpp
+// Box-Sphere collision
+bool hit = SSO::3D::SSO_CheckCollisionBoxSphere(boxBounds, sphereCenter, sphereRadius);
+
+// Sphere-Sphere collision
+bool hit = SSO::3D::SSO_CheckCollisionSpheres(center1, radius1, center2, radius2);
+
+// Box-Box collision
+bool hit = SSO::3D::SSO_CheckCollisionBoxes(box1, box2);
+```
+
+### Example Usage
+```cpp
+#include "tools/sso_3d.h"
+#include "tools/sso_window.h"
+
+int main() {
+    SSO::Window::Init(1280, 720, "3D Demo");
+    
+    // Setup 3D camera
+    Camera3D camera = { 0 };
+    camera.position = { 10.0f, 10.0f, 10.0f };
+    camera.target = { 0.0f, 0.0f, 0.0f };
+    camera.up = { 0.0f, 1.0f, 0.0f };
+    camera.fovy = 45.0f;
+    camera.projection = CAMERA_PERSPECTIVE;
+    
+    // Load 3D model
+    Model model = SSO::3D::SSO_LoadModel("assets/cube.obj");
+    
+    while (!WindowShouldClose()) {
+        SSO::Window::BeginDrawingVirtual();
+        ClearBackground(BLACK);
+        
+        // Begin 3D rendering
+        SSO::3D::SSO_BeginMode3D(camera);
+        
+        // Draw grid
+        SSO::3D::SSO_DrawGrid(20, 1.0f);
+        
+        // Draw model
+        SSO::3D::SSO_DrawModel(model, {0, 0, 0}, 1.0f, WHITE);
+        
+        // Draw some shapes
+        SSO::3D::SSO_DrawCube({-3, 1, -3}, 2.0f, RED);
+        SSO::3D::SSO_DrawSphere({3, 1, -3}, 1.0f, BLUE);
+        
+        // End 3D mode
+        SSO::3D::SSO_EndMode3D();
+        
+        // Draw 2D UI on top
+        DrawText("3D Demo", 10, 10, 20, WHITE);
+        
+        SSO::Window::EndDrawingVirtual();
+    }
+    
+    SSO::3D::SSO_UnloadModel(model);
+    SSO::Window::Close();
+    return 0;
+}
+```
+
+---
+
+## 🎬 sso_splash.h - Professional Splash Screen System
+
+### What it ACTUALLY Does
+Professional splash screen system with fade-in/fade-out animations, progress bar, and customizable duration. Perfect for giving your game a professional startup experience.
+
+### Include
+```cpp
+#include "tools/sso_splash.h"
+```
+
+### Available Functions
+
+#### **Show Splash Screen**
+```cpp
+// Show splash screen for specified duration (in seconds)
+SSO::Splash::Show(2.0f);  // Show for 2 seconds
+SSO::Splash::Show(3.5f);  // Show for 3.5 seconds
+SSO::Splash::Show(1.0f);  // Show for 1 second
+```
+
+### Features
+- **Automatic Fade Effects** - Smooth fade-in and fade-out animations
+- **Progress Bar** - Visual loading progress indicator
+- **Professional Branding** - "SSOENGINE" title with "Lightweight C++ Power" subtitle
+- **Customizable Duration** - Set any duration in seconds
+- **Early Exit** - Can be closed with window close button
+- **Smooth Performance** - Optimized rendering loop
+
+### Visual Elements
+- **Title**: "SSOENGINE" (large white text, 60px)
+- **Subtitle**: "Lightweight C++ Power" (gray text, 20px)
+- **Progress Bar**: Green bar at bottom showing elapsed time
+- **Background**: Black with fade effects
+
+### Example Usage
+```cpp
+#include "tools/sso_splash.h"
+#include "tools/sso_window.h"
+
+int main() {
+    // Show professional splash screen first
+    SSO::Splash::Show(2.0f);
+    
+    // Initialize your game after splash
+    SSO::Window::Init(1280, 720, "My Game");
+    
+    // Your game code here
+    while (!WindowShouldClose()) {
+        SSO::Window::BeginDrawingVirtual();
+        ClearBackground(BLACK);
+        
+        DrawText("Game Started!", 10, 10, 20, WHITE);
+        
+        SSO::Window::EndDrawingVirtual();
+    }
+    
+    SSO::Window::Close();
+    return 0;
+}
+```
+
+### Integration Tips
+```cpp
+// Use at the very beginning of main()
+int main() {
+    // Professional startup
+    SSO::Splash::Show(2.0f);
+    
+    // Initialize systems
+    SSO::Window::Init(1280, 720, "Game");
+    // ... other initialization
+    
+    // Game loop
+    while (!WindowShouldClose()) {
+        // ... game logic
+    }
+    
+    // Cleanup
+    SSO::Window::Close();
+    return 0;
+}
+```
+
+### Customization Options
+The splash screen is designed to be consistent but you can modify the source if needed:
+- Change title text in `sso_splash.h`
+- Modify colors (currently BLACK background, WHITE title, GRAY subtitle)
+- Adjust animation timing (0.5s fade duration)
+- Change progress bar color (currently LIME)
+
+---
+
+## ⚛️ sso_physics.h - Complete 2D Physics Engine
+
+### What it ACTUALLY Does
+Full-featured 2D physics engine with rigid bodies, collision detection, forces, and impulse-based dynamics.
+
+### Include
+```cpp
+#include "tools/sso_physics.h"
+```
+
+### Available Functions
+
+#### **Physics Constants**
+```cpp
+constexpr float GRAVITY = 980.0f;        // pixels/second^2
+constexpr float AIR_RESISTANCE = 0.99f; // velocity dampening
+constexpr float BOUNCE_DAMPING = 0.7f;   // energy loss on bounce
+```
+
+#### **RigidBody Structure**
+```cpp
+SSO::Physics::RigidBody body;
+body.position = {x, y};
+body.velocity = {vx, vy};
+body.acceleration = {ax, ay};
+body.radius = radius;
+body.mass = mass;
+body.isGrounded = false;
+body.isStatic = false;
+```
+
+#### **Forces & Impulses**
+```cpp
+// Apply continuous force
+SSO::Physics::ApplyForce(body, {forceX, forceY});
+
+// Apply instant impulse
+SSO::Physics::ApplyImpulse(body, {impulseX, impulseY});
+
+// Apply gravity
+body.acceleration = {0, SSO::Physics::GRAVITY};
+```
+
+#### **Collision Detection**
+```cpp
+// Circle vs Circle
+bool collision = SSO::Physics::CheckCircleCollision(circle1, circle2);
+
+// Circle vs Rectangle
+bool collision = SSO::Physics::CheckCircleRectCollision(circle, rect);
+
+// Rectangle vs Rectangle
+bool collision = SSO::Physics::CheckRectCollision(rect1, rect2);
+```
+
+#### **Collision Resolution**
+```cpp
+// Resolve collision between bodies
+SSO::Physics::ResolveCollision(body1, body2);
+
+// Resolve collision with static object
+SSO::Physics::ResolveStaticCollision(body, staticRect);
+```
+
+### Example Usage
+```cpp
+#include "tools/sso_physics.h"
+#include "tools/sso_window.h"
+#include "tools/sso_timer.h"
+
+struct Ball {
+    SSO::Physics::RigidBody body;
+    Color color;
+};
+
+int main() {
+    SSO::Window::Init(1280, 720, "Physics Demo");
+    SSO::Timer timer;
+    
+    std::vector<Ball> balls;
+    
+    // Create some balls
+    for (int i = 0; i < 10; i++) {
+        Ball ball;
+        ball.body.position = {100.0f + i * 50.0f, 100.0f};
+        ball.body.velocity = {(float)(rand() % 200 - 100), 0};
+        ball.body.radius = 20.0f;
+        ball.body.mass = 1.0f;
+        ball.color = {rand() % 255, rand() % 255, rand() % 255, 255};
+        balls.push_back(ball);
+    }
+    
+    while (!WindowShouldClose()) {
+        float dt = timer.GetDeltaTime();
+        
+        // Update physics
+        for (auto& ball : balls) {
+            // Apply gravity
+            ball.body.acceleration = {0, SSO::Physics::GRAVITY};
+            
+            // Update velocity and position
+            ball.body.velocity.x += ball.body.acceleration.x * dt;
+            ball.body.velocity.y += ball.body.acceleration.y * dt;
+            ball.body.position.x += ball.body.velocity.x * dt;
+            ball.body.position.y += ball.body.velocity.y * dt;
+            
+            // Apply air resistance
+            ball.body.velocity.x *= SSO::Physics::AIR_RESISTANCE;
+            ball.body.velocity.y *= SSO::Physics::AIR_RESISTANCE;
+            
+            // Ground collision
+            if (ball.body.position.y + ball.body.radius >= 650) {
+                ball.body.position.y = 650 - ball.body.radius;
+                ball.body.velocity.y *= -SSO::Physics::BOUNCE_DAMPING;
+            }
+        }
+        
+        // Ball-to-ball collisions
+        for (size_t i = 0; i < balls.size(); i++) {
+            for (size_t j = i + 1; j < balls.size(); j++) {
+                if (SSO::Physics::CheckCircleCollision(balls[i].body.position, balls[i].body.radius,
+                                                       balls[j].body.position, balls[j].body.radius)) {
+                    SSO::Physics::ResolveCollision(balls[i].body, balls[j].body);
+                }
+            }
+        }
+        
+        // Rendering
+        SSO::Window::BeginDrawingVirtual();
+        ClearBackground(BLACK);
+        
+        for (const auto& ball : balls) {
+            DrawCircleV(ball.body.position, ball.body.radius, ball.color);
+        }
+        
+        SSO::Window::EndDrawingVirtual();
+    }
+    
+    SSO::Window::Close();
+    return 0;
+}
+```
+
+---
+
+## 📦 sso_container.h - Panel & Widget System
+
+### What it ACTUALLY Does
+Modern UI container system with auto-stacking widgets, theme management, and two development paths: Classic Game (manual positioning) and App (container-based).
+
+### Include
+```cpp
+#include "tools/sso_container.h"
+```
+
+### Available Functions
+
+#### **Theme System**
+```cpp
+// Set global theme
+SSO::Container::SSO_SetTheme(SSO::Container::THEME_DARK);    // Dark theme
+SSO::Container::SSO_SetTheme(SSO::Container::THEME_LIGHT);   // Light theme
+SSO::Container::SSO_SetTheme(SSO::Container::THEME_SSO_BLUE); // SSO Blue theme
+```
+
+#### **Panel System (Jalur App)**
+```cpp
+// Begin panel area
+SSO::Container::SSO_BeginPanel({10, 10, 300, 400});
+
+// Auto-stacking widgets
+SSO::Container::SSO_PushWidget("Click Me");        // Button
+SSO::Container::SSO_PushLabel("Information");      // Label
+SSO::Container::SSO_PushCheckbox("Enable", true);  // Checkbox
+SSO::Container::SSO_PushSlider("Volume", 50.0f);  // Slider
+
+// Render panel
+SSO::Container::SSO_RenderPanel();
+```
+
+#### **Widget Interaction**
+```cpp
+// Check button click
+if (SSO::Container::SSO_IsButtonClicked("Click Me")) {
+    // Button was clicked
+}
+
+// Get checkbox state
+bool enabled = SSO::Container::SSO_IsCheckboxChecked("Enable");
+
+// Get slider value
+float volume = SSO::Container::SSO_GetSliderValue("Volume");
+```
+
+#### **Classic Game Functions (Jalur Game)**
+```cpp
+// Manual positioning - free coordinate system
+Vector2 playerPos = {100, 200};
+SSO::Container::SSO_DrawSprite(playerTexture, playerPos);
+
+SSO::Container::SSO_DrawRectangle({50, 50, 100, 100}, RED);
+SSO::Container::SSO_DrawCircle({400, 300}, 50, BLUE);
+SSO::Container::SSO_DrawText("Score: 100", {10, 10}, 20, WHITE);
+```
+
+### Theme Options
+- **THEME_DARK** - Dark gray background with blue accents
+- **THEME_LIGHT** - Light background with subtle shadows
+- **THEME_SSO_BLUE** - Professional blue theme
+
+### Example Usage
+```cpp
+#include "tools/sso_container.h"
+#include "tools/sso_window.h"
+
+int main() {
+    SSO::Window::Init(1280, 720, "Container Demo");
+    SSO::Container::SSO_InitContainer();
+    
+    // Set theme
+    SSO::Container::SSO_SetTheme(SSO::Container::THEME_SSO_BLUE);
+    
+    while (!WindowShouldClose()) {
+        SSO::Window::BeginDrawingVirtual();
+        ClearBackground(BLACK);
+        
+        // Jalur App - Container System
+        SSO::Container::SSO_BeginPanel({50, 50, 300, 400});
+        SSO::Container::SSO_PushLabel("Application Settings");
+        SSO::Container::SSO_PushCheckbox("Enable Sound", true);
+        SSO::Container::SSO_PushSlider("Master Volume", 75.0f);
+        SSO::Container::SSO_PushWidget("Apply Settings");
+        SSO::Container::SSO_PushWidget("Reset to Default");
+        SSO::Container::SSO_RenderPanel();
+        
+        // Jalur Game - Classic Manual Positioning
+        Vector2 playerPos = {500, 300};
+        SSO::Container::SSO_DrawRectangle(playerPos, {50, 50}, GREEN);
+        SSO::Container::SSO_DrawText("Player", playerPos.x, playerPos.y - 20, 12, WHITE);
+        
+        // Handle interactions
+        if (SSO::Container::SSO_IsButtonClicked("Apply Settings")) {
+            // Apply settings logic
+        }
+        
+        if (SSO::Container::SSO_IsButtonClicked("Reset to Default")) {
+            // Reset logic
+        }
+        
+        SSO::Window::EndDrawingVirtual();
+    }
+    
+    SSO::Window::Close();
+    return 0;
+}
+```
+
+---
+
+## 🎮 sso_3d.h - High-Level 3D Rendering
+
+### What it ACTUALLY Does
+Simplified 3D rendering system with high-level API, supporting model loading, basic shapes, and easy 2D/3D switching.
+
+### Include
+```cpp
+#include "tools/sso_3d.h"
+```
+
+### Available Functions
+
+#### **Model Loading**
+```cpp
+// Load 3D models (supports .obj, .gltf, .iqm)
+Model playerModel = SSO::3D::SSO_LoadModel("assets/player.obj");
+Model terrainModel = SSO::3D::SSO_LoadModel("assets/level.gltf");
+
+// Clean up
+SSO::3D::SSO_UnloadModel(playerModel);
+```
+
+#### **3D Rendering**
+```cpp
+// Simple model rendering
+SSO::3D::SSO_DrawModel(playerModel, {0, 0, 0}, 1.0f, WHITE);
+
+// Camera system
+Camera3D camera = { 0 };
+camera.position = {10.0f, 10.0f, 10.0f};
+camera.target = {0.0f, 0.0f, 0.0f};
+camera.up = {0.0f, 1.0f, 0.0f};
+camera.fovy = 45.0f;
+camera.projection = CAMERA_PERSPECTIVE;
+
+// 3D Mode switching
+SSO::3D::SSO_BeginMode3D(camera);
+// Draw 3D objects here
+SSO::3D::SSO_EndMode3D();
+
+// Draw 2D UI after 3D
+DrawText("Score: 100", 10, 10, 20, WHITE);
+```
+
+#### **Basic 3D Shapes**
+```cpp
+// Quick prototyping shapes
+SSO::3D::SSO_DrawCube({0, 0, 0}, 2.0f, RED);
+SSO::3D::SSO_DrawSphere({5, 0, 0}, 1.0f, BLUE);
+SSO::3D::SSO_DrawCylinder({-5, 0, 0}, 1.0f, 1.0f, 3.0f, 16, GREEN);
+
+// Wireframe versions
+SSO::3D::SSO_DrawCubeWires({0, 2, 0}, 2.0f, WHITE);
+SSO::3D::SSO_DrawSphereWires({5, 2, 0}, 1.0f, WHITE);
+```
+
+#### **Grid & Gizmos**
+```cpp
+// Draw floor grid
+SSO::3D::SSO_DrawGrid(20, 1.0f);
+
+// Draw transform gizmo
+SSO::3D::SSO_DrawGizmo({0, 0, 0});
+```
+
+#### **Advanced 3D Functions**
+```cpp
+// Billboards (always face camera)
+SSO::3D::SSO_DrawBillboard(camera, texture, {0, 5, 0}, 2.0f, WHITE);
+
+// Draw plane
+SSO::3D::SSO_DrawPlane({0, -1, 0}, {20, 20}, GRAY);
+
+// Draw ray for debugging
+SSO::3D::SSO_DrawRay({0, 0, 0}, {1, 0, 0}, RED);
+```
+
+#### **3D Collision**
+```cpp
+// Get model bounding box
+BoundingBox bbox = SSO::3D::SSO_GetModelBoundingBox(model);
+
+// Collision checks
+bool hit1 = SSO::3D::SSO_CheckCollisionBoxSphere(bbox, {0, 0, 0}, 2.0f);
+bool hit2 = SSO::3D::SSO_CheckCollisionSpheres({0, 0, 0}, 1.0f, {5, 0, 0}, 2.0f);
+bool hit3 = SSO::3D::SSO_CheckCollisionBoxes(bbox1, bbox2);
+```
+
+### Example Usage
+```cpp
+#include "tools/sso_3d.h"
+#include "tools/sso_window.h"
+#include "tools/sso_container.h"
+
+int main() {
+    SSO::Window::Init(1280, 720, "3D Demo");
+    
+    // Load models
+    Model playerModel = SSO::3D::SSO_LoadModel("player.obj");
+    Model enemyModel = SSO::3D::SSO_LoadModel("enemy.gltf");
+    
+    // Setup camera
+    Camera3D camera = { 0 };
+    camera.position = {10.0f, 10.0f, 10.0f};
+    camera.target = {0.0f, 0.0f, 0.0f};
+    camera.up = {0.0f, 1.0f, 0.0f};
+    camera.fovy = 45.0f;
+    camera.projection = CAMERA_PERSPECTIVE;
+    
+    Vector3 playerPos = {0, 0, 0};
+    float rotation = 0.0f;
+    
+    while (!WindowShouldClose()) {
+        // Update
+        if (IsKeyDown(KEY_RIGHT)) rotation += 2.0f * GetFrameTime();
+        if (IsKeyDown(KEY_LEFT)) rotation -= 2.0f * GetFrameTime();
+        
+        // 3D Rendering
+        SSO::Window::BeginDrawingVirtual();
+        ClearBackground(BLACK);
+        
+        SSO::3D::SSO_BeginMode3D(camera);
+        
+        // Draw grid
+        SSO::3D::SSO_DrawGrid(20, 1.0f);
+        
+        // Draw 3D objects
+        SSO::3D::SSO_DrawModel(playerModel, playerPos, 1.0f, WHITE);
+        
+        // Draw some basic shapes
+        SSO::3D::SSO_DrawCube({5, 1, 0}, 2.0f, RED);
+        SSO::3D::SSO_DrawSphere({-5, 1, 0}, 1.5f, BLUE);
+        SSO::3D::SSO_DrawCylinder({0, 0, 5}, 1.0f, 1.0f, 3.0f, 16, GREEN);
+        
+        SSO::3D::SSO_EndMode3D();
+        
+        // Draw 2D UI over 3D
+        SSO::Container::SSO_BeginPanel({10, 10, 200, 150});
+        SSO::Container::SSO_PushLabel("3D Controls");
+        SSO::Container::SSO_PushLabel("Arrow Keys: Rotate");
+        SSO::Container::SSO_PushLabel("ESC: Exit");
+        SSO::Container::SSO_RenderPanel();
+        
+        SSO::Window::EndDrawingVirtual();
+    }
+    
+    // Cleanup
+    SSO::3D::SSO_UnloadModel(playerModel);
+    SSO::3D::SSO_UnloadModel(enemyModel);
+    SSO::Window::Close();
+    return 0;
+}
+```
+
+---
 
 ### Status
 This file exists but is currently empty (only contains a blank line).
@@ -674,7 +1668,7 @@ This file exists but is currently empty (only contains a blank line).
 
 ## 🚀 Complete Game Example
 
-Here's how to use the ACTUAL advanced tools together:
+Here's how to use ALL the advanced tools together:
 
 ```cpp
 #include "tools/sso_window.h"
@@ -683,9 +1677,18 @@ Here's how to use the ACTUAL advanced tools together:
 #include "tools/sso_ui.h"
 #include "tools/sso_math.h"
 #include "tools/sso_logger.h"
+#include "tools/sso_physics.h"
+#include "tools/sso_ext.h"
+#include "tools/sso_file.h"
+#include "tools/sso_splash.h"
+#include "tools/sso_text.h"
+#include "tools/sso_provider.h"
 
 int main() {
-    // Initialize systems
+    // Show professional splash screen
+    SSO::Splash::Show(2.0f);
+    
+    // Initialize systems with logging
     SSO::Logger::Log(SSO::Logger::Level::INFO, "Starting game...");
     
     // Window setup with virtual resolution
@@ -704,17 +1707,54 @@ int main() {
     gameTimer.SetValue(120.0f); // 2 minute timer
     gameTimer.Start();
     
-    // Game objects
-    Rectangle player = {0, 0, 40, 40};
-    Rectangle wall = {200, 100, 80, 20};
-    Vector2 previousPos = {0, 0};
+    // Physics world
+    std::vector<SSO::Physics::RigidBody> physicsObjects;
+    
+    // Create player physics body
+    SSO::Physics::RigidBody player;
+    player.position = {0, 0};
+    player.velocity = {0, 0};
+    player.radius = 20.0f;
+    player.mass = 1.0f;
+    player.isGrounded = false;
+    player.isStatic = false;
+    physicsObjects.push_back(player);
+    
+    // Create some physics obstacles
+    for (int i = 0; i < 5; i++) {
+        SSO::Physics::RigidBody obstacle;
+        obstacle.position = {200.0f + i * 150.0f, -100.0f};
+        obstacle.velocity = {0, 0};
+        obstacle.radius = 15.0f;
+        obstacle.mass = 2.0f;
+        obstacle.isGrounded = false;
+        obstacle.isStatic = false;
+        physicsObjects.push_back(obstacle);
+    }
     
     // UI setup
     Font font = GetFontDefault();
     Rectangle buttonRect = {550, 20, 150, 40};
-    Rectangle healthBarRect = {550, 70, 150, 20};
+    Rectangle loadButtonRect = {550, 70, 150, 40};
+    Rectangle saveButtonRect = {550, 120, 150, 40};
+    Rectangle healthBarRect = {550, 170, 150, 20};
     float health = 100.0f;
     bool showPopup = false;
+    
+    // Check if git is available
+    bool hasGit = SSO_HasTool("git");
+    if (hasGit) {
+        SSO::Logger::Log(SSO::Logger::Level::INFO, "Git is available");
+    }
+    
+    // Try to load assets from bundle
+    Texture2D playerTexture = {0};
+    if (SSO::Provider::LoadTextureFromBundle("assets.sso", "player.png").id > 0) {
+        playerTexture = SSO::Provider::LoadTextureFromBundle("assets.sso", "player.png");
+        SSO::Logger::Log(SSO::Logger::Level::SUCCESS, "Loaded assets from bundle");
+    } else {
+        SSO::Logger::Log(SSO::Logger::Level::WARNING, "Using fallback textures");
+    }
     
     SSO::Logger::Log(SSO::Logger::Level::INFO, "Game loop started");
     
@@ -724,28 +1764,95 @@ int main() {
         // Update game timer
         gameTimer.UpdateCountdown(dt);
         
-        // Player movement
-        previousPos = {player.x, player.y};
-        if (IsKeyDown(KEY_RIGHT)) player.x += 200 * dt;
-        if (IsKeyDown(KEY_LEFT)) player.x -= 200 * dt;
-        if (IsKeyDown(KEY_UP)) player.y -= 200 * dt;
-        if (IsKeyDown(KEY_DOWN)) player.y += 200 * dt;
+        // Player movement with physics
+        Vector2 previousPos = physicsObjects[0].position;
+        if (IsKeyDown(KEY_RIGHT)) physicsObjects[0].velocity.x = 200;
+        else if (IsKeyDown(KEY_LEFT)) physicsObjects[0].velocity.x = -200;
+        else physicsObjects[0].velocity.x = 0;
         
-        // Collision resolution
-        if (CheckCollision(player, wall)) {
-            ResolveCollision(&player, wall, previousPos);
-            SSO::Logger::Log(SSO::Logger::Level::WARNING, "Player collision with wall");
+        if (IsKeyDown(KEY_UP) && physicsObjects[0].isGrounded) {
+            physicsObjects[0].velocity.y = -400; // Jump
+        }
+        
+        // Update all physics objects
+        for (auto& body : physicsObjects) {
+            if (body.isStatic) continue;
+            
+            // Apply gravity
+            body.acceleration = {0, SSO::Physics::GRAVITY};
+            
+            // Update velocity and position
+            body.velocity.x += body.acceleration.x * dt;
+            body.velocity.y += body.acceleration.y * dt;
+            body.position.x += body.velocity.x * dt;
+            body.position.y += body.velocity.y * dt;
+            
+            // Apply air resistance
+            body.velocity.x *= 0.98f;
+            body.velocity.y *= 0.98f;
+            
+            // Ground collision
+            if (body.position.y + body.radius >= 300) {
+                body.position.y = 300 - body.radius;
+                body.velocity.y *= -SSO::Physics::BOUNCE_DAMPING;
+                if (fabs(body.velocity.y) < 50) {
+                    body.isGrounded = true;
+                    body.velocity.y = 0;
+                }
+            } else {
+                body.isGrounded = false;
+            }
+            
+            // Wall boundaries
+            if (body.position.x - body.radius < -400) body.position.x = -400 + body.radius;
+            if (body.position.x + body.radius > 400) body.position.x = 400 - body.radius;
+        }
+        
+        // Physics collisions between objects
+        for (size_t i = 0; i < physicsObjects.size(); i++) {
+            for (size_t j = i + 1; j < physicsObjects.size(); j++) {
+                if (SSO::Physics::CheckCircleCollision(physicsObjects[i].position, physicsObjects[i].radius,
+                                                       physicsObjects[j].position, physicsObjects[j].radius)) {
+                    SSO::Physics::ResolveCollision(physicsObjects[i], physicsObjects[j]);
+                }
+            }
         }
         
         // Camera follow with smoothing
-        camera.Follow({player.x + 20, player.y + 20}, dt);
+        camera.Follow(physicsObjects[0].position, dt);
         
-        // Handle UI
+        // Handle UI interactions
         if (SSO::UI::DrawButton(buttonRect, "Shake", font)) {
             camera.Shake(20.0f, 0.5f);
             SSO::Logger::Log(SSO::Logger::Level::INFO, "Camera shake triggered");
         }
         
+        // Load texture from file dialog
+        if (SSO::UI::DrawButton(loadButtonRect, "Load Tex", font)) {
+            std::string texturePath = SSO_OpenFile(
+                "Image Files\0*.png;*.jpg;*.jpeg\0All Files\0*.*\0",
+                "Load Texture"
+            );
+            if (!texturePath.empty()) {
+                if (playerTexture.id > 0) UnloadTexture(playerTexture);
+                playerTexture = LoadTexture(texturePath.c_str());
+                SSO::Logger::Log(SSO::Logger::Level::SUCCESS, "Texture loaded from file");
+            }
+        }
+        
+        // Save screenshot
+        if (SSO::UI::DrawButton(saveButtonRect, "Save", font)) {
+            std::string savePath = SSO_SaveFile(
+                "PNG Files\0*.png\0All Files\0*.*\0",
+                "Save Screenshot"
+            );
+            if (!savePath.empty()) {
+                TakeScreenshot(savePath.c_str());
+                SSO::Logger::Log(SSO::Logger::Level::SUCCESS, "Screenshot saved");
+            }
+        }
+        
+        // Health system
         if (gameTimer.IsFinished()) {
             health -= dt * 10; // Lose health over time
             if (health <= 0) {
@@ -761,13 +1868,37 @@ int main() {
         // Game world (with camera)
         camera.Begin();
         DrawGrid(40, 100);
-        DrawRectangleRec(player, BLUE);
-        DrawRectangleRec(wall, RED);
+        
+        // Draw ground
+        DrawRectangle(-400, 300, 800, 20, BROWN);
+        
+        // Draw physics objects
+        for (size_t i = 0; i < physicsObjects.size(); i++) {
+            Color color = (i == 0) ? BLUE : RED;
+            DrawCircleV(physicsObjects[i].position, physicsObjects[i].radius, color);
+            
+            // Draw texture if loaded
+            if (playerTexture.id > 0 && i == 0) {
+                DrawTexture(playerTexture, 
+                           physicsObjects[i].position.x - playerTexture.width/2,
+                           physicsObjects[i].position.y - playerTexture.height/2, 
+                           WHITE);
+            }
+        }
+        
         camera.End();
         
         // UI (no camera)
         DrawText(TextFormat("Time: %.1f", gameTimer.GetValue()), 10, 10, 20, WHITE);
         DrawText(TextFormat("FPS: %d", GetFPS()), 10, 40, 20, WHITE);
+        DrawText(TextFormat("Objects: %zu", physicsObjects.size()), 10, 70, 20, WHITE);
+        
+        // Advanced text rendering
+        SSO::Text::DrawGradient("PHYSICS DEMO", 10, 120, 30, YELLOW, RED);
+        SSO::Text::DrawTypewriter("Advanced physics simulation with SSOEngine tools...", 
+                                10, 160, 15, 20.0f, GetTime(), LIME);
+        
+        // UI elements
         SSO::UI::DrawHealthBar(healthBarRect, health, 100.0f, GREEN, RED);
         
         // Popup
@@ -778,7 +1909,8 @@ int main() {
                 gameTimer.Reset();
                 gameTimer.Start();
                 health = 100.0f;
-                player = {0, 0};
+                physicsObjects[0].position = {0, 0};
+                physicsObjects[0].velocity = {0, 0};
                 SSO::Logger::Log(SSO::Logger::Level::INFO, "Game restarted");
             }
         }
@@ -786,6 +1918,8 @@ int main() {
         SSO::Window::EndDrawingVirtual();
     }
     
+    // Cleanup
+    if (playerTexture.id > 0) UnloadTexture(playerTexture);
     SSO::Logger::Log(SSO::Logger::Level::INFO, "Game ending...");
     SSO::Window::Close();
     return 0;
@@ -803,12 +1937,21 @@ int main() {
 - ✅ **Complete UI system** - With panels, modals, and styling
 - ✅ **Collision utilities** - Essential math functions
 - ✅ **Colored logger** - With timestamps and colors
+- ✅ **System extensions** - Cross-platform file operations and downloads
+- ✅ **File dialogs** - Native Windows open/save dialogs
+- ✅ **Physics engine** - Complete 2D physics with collision detection
+- ✅ **Asset bundles** - Custom .sso format for asset packaging
+- ✅ **3D rendering** - High-level 3D API with model loading, shapes, and collision
+- ✅ **Splash screens** - Professional startup screens with fade effects and progress bar
+- ✅ **Advanced text** - Typewriter effects, gradients, and wrapping
+- ✅ **Container system** - Auto-stacking widgets with themes (NEW)
 
 ### Limitations
 - **sso_utils.h is empty** - Currently contains no functions
-- **Windows-focused** - Some features may not work cross-platform
-- **Requires C++11 or later** - Uses chrono and modern C++ features
-- **Memory management** - Manual cleanup required for some resources
+- **sso_file.h is Windows-only** - Uses Windows API for file dialogs
+- **sso_ext.h requires C++17** - Uses filesystem library
+- **sso_provider.h needs manual memory management** - Free raw data when done
+- **Physics engine is 2D only** - No 3D physics support
 
 ### Best Practices
 1. **Use SSO::Window::BeginDrawingVirtual()** - Not BeginDrawing()
@@ -818,9 +1961,14 @@ int main() {
 
 ### When to Use These Tools
 - ✅ **2D games with advanced camera** - Platformers, top-down games
+- ✅ **3D games and prototypes** - 3D demos, mixed 2D/3D games
+- ✅ **Games with professional presentation** - Commercial-quality games with splash screens
 - ✅ **Games with complex UI** - RPGs, strategy games
 - ✅ **Games with timing mechanics** - Puzzles, arcade games
 - ✅ **Games needing collision** - Action games, platformers
+- ✅ **Games with physics simulation** - Puzzle games, sandbox games
+- ✅ **Games needing file operations** - Level editors, asset managers
+- ✅ **Games requiring asset bundles** - Large games with many assets
 
 ---
 

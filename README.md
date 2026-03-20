@@ -1,8 +1,8 @@
 # SSOEngine
 
-**Simple 2D Game Engine Built with Raylib**
+**Simple 2D/3D Game Engine Built with Raylib**
 
-> ⚠️ **REALISTIC VERSION**: This is a basic 2D game engine wrapper around Raylib, not a full commercial engine.
+> ⚠️ **REALISTIC VERSION**: This is a basic game engine wrapper around Raylib with 2D focus and emerging 3D capabilities, not a full commercial engine.
 
 ---
 
@@ -32,7 +32,15 @@ SSOEngine is a **simplified C++ game development framework** that:
 - sso_ui.h        // Basic UI elements
 - sso_math.h      // Math utilities
 - sso_logger.h    // Simple logging
-- sso_utils.h     // General utilities
+- sso_3d.h       // 3D rendering API (NEW)
+- sso_splash.h   // Professional splash screens
+- sso_container.h // Auto-stacking widgets (NEW)
+- sso_physics.h  // 2D physics engine
+- sso_provider.h // Asset bundle system
+- sso_ext.h       // System extensions
+- sso_file.h      // File dialogs
+- sso_text.h      // Advanced text rendering
+- sso_utils.h     // General utilities (empty)
 ```
 
 ### Build System
@@ -107,6 +115,7 @@ SSOEngine/
 
 ### ✅ Supported Features
 - **2D Graphics** - Sprites, shapes, text
+- **3D Graphics** - Model loading, basic shapes, collision detection
 - **Basic Audio** - Sound effects, music
 - **Input Handling** - Keyboard, mouse
 - **Asset Management** - Custom .sso format
@@ -114,8 +123,8 @@ SSOEngine/
 - **Basic UI** - Simple buttons and text
 
 ### ❌ NOT Supported (Yet)
-- **3D Graphics** - 2D only currently
-- **Advanced Physics** - Basic collision only
+- **Advanced 3D** - Basic 3D only, no advanced features
+- **3D Physics** - 2D physics only
 - **Networking** - Single player only
 - **Mobile Platforms** - Windows only
 - **Visual Editor** - Code-based development
@@ -209,7 +218,9 @@ Your support helps us:
 *Have you made a game with SSOEngine? Let us know and we'll feature it here!*
 
 ### Features in Development
-- 🎵 Audio system improvements
+- � 3D rendering improvements
+- 🎬 Enhanced splash screen system
+- �🎵 Audio system improvements
 - 🌐 Networking support
 - 🎨 Particle system
 - 📱 Mobile export options
