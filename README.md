@@ -32,9 +32,10 @@ SSOEngine is a **simplified C++ game development framework** that:
 - sso_ui.h        // Basic UI elements
 - sso_math.h      // Math utilities
 - sso_logger.h    // Simple logging
-- sso_3d.h       // 3D rendering API (NEW)
+- sso_3d.h       // 3D rendering API with shader support
+- sso_ph3d.h      // Advanced 3D physics engine
 - sso_splash.h   // Professional splash screens
-- sso_container.h // Auto-stacking widgets (NEW)
+- sso_container.h // Auto-stacking widgets
 - sso_physics.h  // 2D physics engine
 - sso_provider.h // Asset bundle system
 - sso_ext.h       // System extensions
@@ -116,15 +117,15 @@ SSOEngine/
 ### ✅ Supported Features
 - **2D Graphics** - Sprites, shapes, text
 - **3D Graphics** - Model loading, basic shapes, collision detection
-- **Basic Audio** - Sound effects, music
-- **Input Handling** - Keyboard, mouse
-- **Asset Management** - Custom .sso format
+- **3D Physics** - Advanced rigid body physics with realistic collision
+- **Shader System** - 5 professional shader effects (Bloom, CRT, Grayscale, Blur, Basic Light)
+- **Input Handling** - Keyboard, mouse, WASD movement
+- **Asset Management** - Custom .sso format with shader loading
 - **Window Management** - Resizable windows
 - **Basic UI** - Simple buttons and text
 
 ### ❌ NOT Supported (Yet)
-- **Advanced 3D** - Basic 3D only, no advanced features
-- **3D Physics** - 2D physics only
+- **Advanced 3D** - Support shaders,news feature!
 - **Networking** - Single player only
 - **Mobile Platforms** - Windows only
 - **Visual Editor** - Code-based development
@@ -218,9 +219,8 @@ Your support helps us:
 *Have you made a game with SSOEngine? Let us know and we'll feature it here!*
 
 ### Features in Development
-- � 3D rendering improvements
+- 🎮 3D rendering improvements
 - 🎬 Enhanced splash screen system
-- �🎵 Audio system improvements
 - 🌐 Networking support
 - 🎨 Particle system
 - 📱 Mobile export options

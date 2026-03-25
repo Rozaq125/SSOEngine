@@ -2,14 +2,18 @@
 #include "tools/sso_window.h"
 #include "tools/sso_splash.h"
 #include "tools/sso_text.h"
+#include "tools/sso_3d.h"
 #include "game.h"
 
 int main(void) {
-    SSO::Window::Init(1280, 720, "SSOEngine - Game Loaded");
+    // Initialize window first
+    SSO::Window::Init(1280, 720, "SSOEngine - 3D Physics Test");
     
-    SSO::Splash::Show(2.0f);
+    // Show splash
+    SSO::Splash::Show(6.0f);
     
-    SSO::Window::DisableResizing();
+    // Hide cursor for FPS
+    DisableCursor();
     
     SetTargetFPS(60);
     
@@ -18,17 +22,37 @@ int main(void) {
     while (!WindowShouldClose()) {
         float dt = GetFrameTime();
         
+        // Simple input handling
         if (IsKeyPressed(KEY_F11)) {
             SSO::Window::ToggleFull();
+        }
+        
+        if (IsKeyPressed(KEY_ESCAPE)) {
+            EnableCursor();
+            break;
         }
         
         Update(dt);
         
         SSO::Window::BeginDrawingVirtual();
-        Render();
+        
+        // Clear background
+        ClearBackground(BLACK);
+        
+        // 3D Rendering
+        SSO::ThreeD::SSO_BeginMode3D(physicsGame.camera);
+        
+        RenderPhysicsWorld();
+        
+        SSO::ThreeD::SSO_EndMode3D();
+        
+        // 2D UI
+        RenderUI();
+        
         SSO::Window::EndDrawingVirtual();
     }
     
+    // Cleanup
     Shutdown();
     SSO::Window::Close();
     

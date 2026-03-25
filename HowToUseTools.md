@@ -23,7 +23,8 @@ All tools are located in: `01_Core/tools/`
 ├── sso_physics.h    # Complete 2D Physics Engine
 ├── sso_provider.h   # Asset Bundle System
 ├── sso_splash.h     # Professional Splash Screen System
-├── sso_3d.h         # High-Level 3D Rendering API
+├── sso_3d.h         # High-Level 3D Rendering API with Shader Support
+├── sso_ph3d.h       # Advanced 3D Physics Engine with Realistic Collision
 ├── sso_text.h       # Advanced Text Rendering
 ├── sso_container.h  # Panel & Widget System (NEW)
 ├── sso_utils.h      # (Currently empty)
@@ -1011,7 +1012,164 @@ bool LoadAssets(GameAssets& assets) {
 
 ---
 
-## 🎮 sso_3d.h - High-Level 3D Rendering API
+## � sso_ph3d.h - Advanced 3D Physics Engine
+
+### What it ACTUALLY Does
+Professional 3D physics engine with realistic rigid body dynamics, collision detection, gravity simulation, and angular velocity. Perfect for creating realistic 3D physics simulations and games.
+
+### Include
+```cpp
+#include "tools/sso_ph3d.h"
+```
+
+### Available Functions
+
+#### **Physics World Management**
+```cpp
+// Initialize physics world
+SSO::Physics3D::Init();
+SSO::Physics3D::SetGravity(-29.43f); // 3x Earth gravity for realistic falling
+
+// Step physics simulation
+SSO::Physics3D::Step(deltaTime);
+
+// Get physics statistics
+int bodyCount = SSO::Physics3D::GetBodyCount();
+
+// Cleanup physics world
+SSO::Physics3D::Cleanup();
+```
+
+#### **Rigid Body Creation**
+```cpp
+// Create dynamic physics body
+SSO::Physics3D::RigidBody* cube = SSO::Physics3D::CreateBody(
+    position,    // Vector3 position
+    size,        // Vector3 dimensions
+    mass         // float mass
+);
+
+// Create static body (immovable)
+SSO::Physics3D::RigidBody* ground = SSO::Physics3D::CreateStaticBody(
+    position,    // Vector3 position
+    size         // Vector3 dimensions
+);
+
+// Configure body properties
+cube->restitution = 0.2f;  // Bounciness (0.0 = no bounce, 1.0 = super bouncy)
+cube->friction = 0.9f;       // Surface friction
+cube->color = BLUE;          // Visual color
+```
+
+#### **Forces & Impulses**
+```cpp
+// Apply continuous force
+SSO::Physics3D::ApplyForce(body, forceVector);
+
+// Apply instant impulse (for explosions, shooting)
+SSO::Physics3D::ApplyImpulse(body, impulseVector);
+
+// Bullet shooting with raycast collision
+SSO::Physics3D::ShootBullet(position, direction, force);
+
+// Explosion effect
+SSO::Physics3D::Explode(center, force, radius);
+```
+
+#### **Physics Properties**
+```cpp
+struct RigidBody {
+    Vector3 position;          // Current position
+    Vector3 velocity;          // Linear velocity
+    Vector3 acceleration;      // Current acceleration
+    Vector3 angularVelocity;   // Rotation speed
+    Vector3 size;             // Dimensions
+    float mass;               // Object mass
+    float restitution;        // Bounciness
+    float friction;           // Surface friction
+    bool isStatic;            // Immovable object
+    bool isGrounded;          // Touching ground
+    bool isActive;            // Physics enabled
+    Color color;              // Visual color
+};
+```
+
+#### **Rendering Helpers**
+```cpp
+// Draw all physics bodies
+SSO::Physics3D::DrawAllBodies();
+
+// Draw single body with wireframe
+SSO::Physics3D::DrawBody(body);
+
+// Get bounding box for collision
+Vector3 minBounds = SSO::Physics3D::GetBoundingBoxMin(body);
+Vector3 maxBounds = SSO::Physics3D::GetBoundingBoxMax(body);
+```
+
+### Physics Features
+- **Realistic Gravity** - Earth gravity simulation with customizable strength
+- **Collision Detection** - AABB collision with penetration depth calculation
+- **Collision Response** - Impulse-based resolution with mass consideration
+- **Angular Velocity** - Objects tumble and rotate realistically
+- **Chain Reactions** - Force propagation through connected objects
+- **Ground Collision** - Proper bouncing and settling on surfaces
+- **Sub-stepping** - Stable simulation at 60 FPS with multiple physics steps
+
+### Example Usage
+```cpp
+#include "tools/sso_ph3d.h"
+#include "tools/sso_3d.h"
+#include "tools/sso_window.h"
+
+void InitPhysicsDemo() {
+    // Initialize physics world
+    SSO::Physics3D::Init();
+    SSO::Physics3D::SetGravity(-29.43f); // 3x Earth gravity
+    
+    // Create ground
+    SSO::Physics3D::CreateStaticBody({0, -0.5f, 0}, {20, 1, 20});
+    
+    // Create pyramid of cubes
+    for (int layer = 0; layer < 4; layer++) {
+        for (int i = 0; i < (4 - layer); i++) {
+            Vector3 pos = {(float)i * 1.1f - 1.65f, layer * 1.1f + 1.0f, 0.0f};
+            SSO::Physics3D::RigidBody* cube = SSO::Physics3D::CreateBody(pos, {1.0f, 1.0f, 1.0f}, 1.0f);
+            cube->restitution = 0.2f; // Low bounciness
+            cube->friction = 0.9f;    // High friction
+            cube->color = colors[layer];
+        }
+    }
+}
+
+void UpdatePhysics(float dt) {
+    // Step physics simulation
+    SSO::Physics3D::Step(dt);
+    
+    // Handle shooting
+    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+        Vector3 shootPos = camera.position;
+        Vector3 shootDir = GetCameraForward(camera);
+        SSO::Physics3D::ShootBullet(shootPos, shootDir, 35.0f);
+    }
+}
+
+void RenderPhysics() {
+    // Draw ground
+    SSO::ThreeD::SSO_DrawPlane({0, 0, 0}, {20, 20}, GRAY);
+    
+    // Draw all physics bodies
+    SSO::Physics3D::DrawAllBodies();
+    
+    // Draw physics info
+    DrawText(TextFormat("Bodies: %d", SSO::Physics3D::GetBodyCount()), 10, 10, 20, WHITE);
+    DrawText("Gravity: -29.43 m/s²", 10, 40, 20, WHITE);
+}
+```
+
+---
+
+## � sso_3d.h - High-Level 3D Rendering API with Shader Support
 
 ### What it ACTUALLY Does
 High-level 3D rendering system that simplifies Raylib's 3D functions with model loading, basic shapes, collision detection, and camera management. Perfect for 3D prototyping and mixed 2D/3D games.
@@ -1022,6 +1180,51 @@ High-level 3D rendering system that simplifies Raylib's 3D functions with model 
 ```
 
 ### Available Functions
+
+#### **Shader Management**
+```cpp
+// Load shaders from asset bundle
+Shader bloomShader = SSO::ThreeD::LoadShaderFromBundle("assets.sso", "shaders/bloom_glow.fs");
+Shader crtShader = SSO::ThreeD::LoadShaderFromBundle("assets.sso", "shaders/retro_crt.fs");
+
+// Available shader effects:
+// - basic_light.fs    - Classic 3D lighting with shadows
+// - bloom_glow.fs     - YouTube-ready glow effects  
+// - retro_crt.fs      - TV tube scanlines and distortion
+// - grayscale_sepia.fs - Flashback/death effects
+// - blur_bokeh.fs     - Depth-of-field blur
+```
+
+#### **Shader Application**
+```cpp
+// Apply basic lighting
+SSO::ThreeD::ApplyBasicLight(shader, lightPos, lightColor, viewPos);
+
+// Apply bloom glow with pulsing
+SSO::ThreeD::ApplyBloomGlow(shader, time, resolution, 0.8f, 2.0f);
+
+// Apply retro CRT with scanlines
+SSO::ThreeD::ApplyRetroCRT(shader, time, resolution, 0.1f, 0.15f);
+
+// Apply grayscale for flashback
+SSO::ThreeD::ApplyGrayscaleSepia(shader, time, resolution, 1.0f, 1);
+
+// Apply depth blur for backgrounds
+SSO::ThreeD::ApplyBlurBokeh(shader, time, resolution, 2.0f, 10.0f);
+```
+
+#### **Shader Rendering**
+```cpp
+// Begin shader mode
+BeginShaderMode(currentShader);
+
+// Draw 3D objects with shader effects
+SSO::ThreeD::SSO_DrawModel(model, position, scale, color);
+SSO::ThreeD::SSO_DrawCube(position, size, color);
+
+// End shader mode
+EndShaderMode();
+```
 
 #### **Model Loading & Management**
 ```cpp
@@ -1150,7 +1353,6 @@ int main() {
     SSO::Window::Close();
     return 0;
 }
-```
 
 ---
 
@@ -1247,16 +1449,6 @@ The splash screen is designed to be consistent but you can modify the source if 
 ---
 
 ## ⚛️ sso_physics.h - Complete 2D Physics Engine
-
-### What it ACTUALLY Does
-Full-featured 2D physics engine with rigid bodies, collision detection, forces, and impulse-based dynamics.
-
-### Include
-```cpp
-#include "tools/sso_physics.h"
-```
-
-### Available Functions
 
 #### **Physics Constants**
 ```cpp
@@ -1928,6 +2120,34 @@ int main() {
 
 ---
 
+## ❌ Removed Tools
+
+### sso_audio.h - Audio System (REMOVED)
+
+**Status:** ❌ **REMOVED** - All audio functionality has been removed from SSOEngine
+
+**Reason:** The audio system was removed to simplify the engine and focus on core graphics and gameplay features.
+
+**Migration:** Use Raylib's built-in audio functions directly:
+```cpp
+// Instead of SSO::Audio::SSO_LoadMusic()
+Music music = LoadMusic("assets/background.mp3");
+
+// Instead of SSO::Audio::SSO_PlayMusic()
+PlayMusicStream(music);
+
+// Instead of SSO::Audio::SSO_UpdateMusic()
+UpdateMusicStream(music);
+```
+
+**Files Affected:**
+- `main.cpp` - Audio loading and controls removed
+- `game.h` - Audio status indicators removed  
+- `main_backup.cpp` - Audio functionality removed
+- `audio_example.cpp` - Entire file deleted
+
+---
+
 ## ⚠️ Important Notes
 
 ### What These Tools ACTUALLY Are
@@ -1952,6 +2172,7 @@ int main() {
 - **sso_ext.h requires C++17** - Uses filesystem library
 - **sso_provider.h needs manual memory management** - Free raw data when done
 - **Physics engine is 2D only** - No 3D physics support
+- **sso_audio.h has been removed** - Audio functionality is no longer available
 
 ### Best Practices
 1. **Use SSO::Window::BeginDrawingVirtual()** - Not BeginDrawing()

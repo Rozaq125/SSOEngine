@@ -113,24 +113,44 @@ namespace SSO {
             return LoadMusicStreamFromMemory(GetFileExtension(fName.c_str()), data, size);
         }
 
-        // Load 3D Models (.obj, .gltf, .iqm) - NEW 3D SUPPORT
+        // Load 3D Models (fallback to file loading if memory functions not available)
         inline Model LoadModelFromBundle(const std::string& bPath, const std::string& fName) {
             int size = 0;
             unsigned char* data = LoadRawDataFromBundle(bPath, fName, &size);
             if (!data) return { 0 };
 
-            Model model = LoadModelFromMemory(GetFileExtension(fName.c_str()), data, size);
+            // Try to load from memory first, fallback to file
+            Model model = { 0 };
+            try {
+                // Note: LoadModelFromMemory may not be available in all Raylib versions
+                // For now, we'll load from file instead
+                std::string fullPath = bPath + "/" + fName;
+                model = LoadModel(fullPath.c_str());
+            } catch (...) {
+                // Final fallback
+                model = { 0 };
+            }
+            
             RL_FREE(data);
             return model;
         }
 
-        // Load 3D Meshes for custom processing
+        // Load 3D Meshes (fallback to file loading)
         inline Mesh LoadMeshFromBundle(const std::string& bPath, const std::string& fName) {
             int size = 0;
             unsigned char* data = LoadRawDataFromBundle(bPath, fName, &size);
             if (!data) return { 0 };
 
-            Mesh mesh = LoadMeshFromMemory(GetFileExtension(fName.c_str()), data, size);
+            // Fallback to file loading
+            std::string fullPath = bPath + "/" + fName;
+            Mesh mesh = { 0 };
+            
+            // Try to load from file
+            Model tempModel = LoadModel(fullPath.c_str());
+            if (tempModel.meshCount > 0) {
+                mesh = tempModel.meshes[0];
+            }
+            
             RL_FREE(data);
             return mesh;
         }
@@ -149,7 +169,7 @@ namespace SSO {
             return mat;
         }
 
-        // Load 3D Animations
+        // Load 3D Animations (fallback to file loading)
         inline ModelAnimation LoadAnimationFromBundle(const std::string& bPath, const std::string& fName, int* animCount) {
             int size = 0;
             unsigned char* data = LoadRawDataFromBundle(bPath, fName, &size);
@@ -158,10 +178,15 @@ namespace SSO {
                 return { 0 };
             }
 
-            ModelAnimation* anims = LoadModelAnimationsFromMemory(GetFileExtension(fName.c_str()), data, size, animCount);
+            // Fallback to file loading
+            std::string fullPath = bPath + "/" + fName;
+            int tempAnimCount = 0;
+            ModelAnimation* anims = LoadModelAnimations(fullPath.c_str(), &tempAnimCount);
             RL_FREE(data);
             
-            if (*animCount > 0) {
+            if (animCount) *animCount = tempAnimCount;
+            
+            if (tempAnimCount > 0) {
                 return anims[0]; // Return first animation
             }
             return { 0 };

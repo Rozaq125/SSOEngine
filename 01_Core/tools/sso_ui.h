@@ -13,16 +13,20 @@ namespace SSO {
             Color baseColor;
             Color hoverColor;
             Color textColor;
-            float roundness;
-            float borderThickness;
+            Color borderColor;
         };
 
-        inline UIStyle DefaultButtonStyle = { { 40, 40, 40, 255 }, { 70, 70, 70, 255 }, WHITE, 0.2f, 2.0f };
-        inline UIStyle PanelStyle = { { 25, 25, 25, 245 }, { 25, 25, 25, 245 }, WHITE, 0.1f, 2.0f };
+        inline UIStyle DefaultButtonStyle = { { 45, 45, 48, 255 }, { 65, 65, 70, 255 }, WHITE, { 100, 100, 110, 255 } };
+        inline UIStyle PanelStyle = { { 30, 30, 35, 250 }, { 30, 30, 35, 250 }, WHITE, { 70, 70, 80, 255 } };
 
         inline void DrawBackground(Texture2D tex, Color tint = WHITE) {
-            if (tex.id <= 0) return;
-            DrawTexturePro(tex, { 0, 0, (float)tex.width, (float)tex.height }, { 0, 0, (float)GetScreenWidth(), (float)GetScreenHeight() }, { 0, 0 }, 0.0f, tint);
+            if (tex.id <= 0) {
+                ClearBackground({ 15, 15, 20, 255 });
+                return;
+            }
+            DrawTexturePro(tex, { 0, 0, (float)tex.width, (float)tex.height }, 
+                           { 0, 0, (float)GetScreenWidth(), (float)GetScreenHeight() }, 
+                           { 0, 0 }, 0.0f, tint);
         }
 
         inline void DrawOverlay(float alpha = 0.5f) {
@@ -37,32 +41,39 @@ namespace SSO {
         inline bool DrawButton(Rectangle rect, const char* text, Font font, UIStyle style = DefaultButtonStyle) {
             Vector2 mouse = GetMousePosition();
             bool hovering = CheckCollisionPointRec(mouse, rect);
-            Color currentBg = hovering ? style.hoverColor : style.baseColor;
             
-            DrawRectangleRounded(rect, style.roundness, 8, currentBg);
-            // FIX: Hapus borderThickness karena Raylib lo gak support thickness di fungsi ini
-            DrawRectangleRoundedLines(rect, style.roundness, 8, hovering ? SKYBLUE : WHITE);
+            Color bg = hovering ? style.hoverColor : style.baseColor;
+            Color border = hovering ? SKYBLUE : style.borderColor;
+
+            // MANUAL RECTANGLE (NO ROUNDED)
+            DrawRectangleRec(rect, bg);
+            DrawRectangleLinesEx(rect, 1, border);
 
             float fontSize = rect.height * 0.4f;
             Vector2 textSize = MeasureTextEx(font, text, fontSize, 1);
             Vector2 textPos = { rect.x + (rect.width / 2) - (textSize.x / 2), rect.y + (rect.height / 2) - (textSize.y / 2) };
+            
             DrawTextEx(font, text, textPos, fontSize, 1, style.textColor);
             return (hovering && IsMouseButtonPressed(MOUSE_LEFT_BUTTON));
         }
 
         inline void DrawPanel(Rectangle rect, const char* title, Font font, UIStyle style = PanelStyle) {
-            DrawRectangleRounded(rect, style.roundness, 8, style.baseColor);
-            // FIX: Hapus borderThickness
-            DrawRectangleRoundedLines(rect, style.roundness, 8, GRAY);
+            // BASE PANEL
+            DrawRectangleRec(rect, style.baseColor);
+            DrawRectangleLinesEx(rect, 1, style.borderColor);
             
-            Rectangle header = { rect.x, rect.y, rect.width, 35 };
-            DrawRectangleRounded(header, style.roundness, 8, MAROON); 
-            DrawTextEx(font, title, { rect.x + 15, rect.y + 8 }, 18, 1, WHITE);
+            // HEADER PANEL (MANUAL SQUARE)
+            Rectangle header = { rect.x, rect.y, rect.width, 30 };
+            DrawRectangleRec(header, { 100, 30, 45, 255 }); 
+            DrawRectangleLinesEx(header, 1, style.borderColor);
+            
+            DrawTextEx(font, title, { rect.x + 10, rect.y + 7 }, 16, 1, WHITE);
         }
 
         inline void BeginScrollArea(Rectangle rect, float* scrollPos, float contentHeight) {
-            DrawRectangleRec(rect, { 20, 20, 20, 255 }); 
-            *scrollPos += GetMouseWheelMove() * 20.0f;
+            DrawRectangleRec(rect, { 25, 25, 30, 255 });
+            *scrollPos += GetMouseWheelMove() * 30.0f;
+            
             if (*scrollPos > 0) *scrollPos = 0;
             if (contentHeight > rect.height) {
                 if (*scrollPos < -(contentHeight - rect.height)) *scrollPos = -(contentHeight - rect.height);
@@ -76,25 +87,45 @@ namespace SSO {
             EndScissorMode();
         }
 
-        inline bool DrawPopUp(Rectangle rect, const char* title, const char* msg, Font font, bool* active) {
+        inline void HandleDrag(Rectangle* rect, bool* dragging) {
+            Vector2 mouse = GetMousePosition();
+            Rectangle header = { rect->x, rect->y, rect->width, 30 };
+            if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && CheckCollisionPointRec(mouse, header)) *dragging = true;
+            if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON)) *dragging = false;
+            
+            if (*dragging) {
+                Vector2 delta = GetMouseDelta();
+                rect->x += delta.x;
+                rect->y += delta.y;
+            }
+        }
+
+        inline bool DrawPopUp(Rectangle* rect, const char* title, const char* msg, Font font, bool* active, bool* dragging) {
             if (!*active) return false;
-            DrawOverlay(0.7f); 
-            DrawPanel(rect, title, font);
-            DrawTextEx(font, msg, { rect.x + 20, rect.y + 60 }, 20, 1, LIGHTGRAY);
-            if (DrawButton({ rect.x + rect.width/2 - 50, rect.y + rect.height - 50, 100, 35 }, "OK", font)) {
+            DrawOverlay(0.6f);
+            HandleDrag(rect, dragging);
+            
+            DrawPanel(*rect, title, font);
+            DrawTextEx(font, msg, { rect->x + 20, rect->y + 60 }, 18, 1, LIGHTGRAY);
+            
+            Rectangle btn = { rect->x + rect->width/2 - 50, rect->y + rect->height - 45, 100, 30 };
+            if (DrawButton(btn, "OK", font)) {
                 *active = false;
+                *dragging = false;
                 return true;
             }
             return false;
         }
 
         inline void DrawHealthBar(Rectangle rect, float current, float max, Color fill, Color bg) {
-            float perc = fmaxf(0.0f, fminf(1.0f, current / max));
-            DrawRectangleRounded(rect, 0.5f, 8, bg); 
-            Rectangle fillRect = { rect.x + 2, rect.y + 2, (rect.width - 4) * perc, rect.height - 4 };
-            if (perc > 0) DrawRectangleRounded(fillRect, 0.5f, 8, fill); 
-            // FIX: Hapus 1.5f
-            DrawRectangleRoundedLines(rect, 0.5f, 8, WHITE); 
+            float perc = (max > 0) ? (current / max) : 0;
+            if (perc < 0) perc = 0; if (perc > 1) perc = 1;
+
+            DrawRectangleRec(rect, bg);
+            if (perc > 0) {
+                DrawRectangleRec({ rect.x + 1, rect.y + 1, (rect.width - 2) * perc, rect.height - 2 }, fill);
+            }
+            DrawRectangleLinesEx(rect, 1, Fade(WHITE, 0.2f));
         }
     }
 }
